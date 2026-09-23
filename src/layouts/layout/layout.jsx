@@ -1,7 +1,10 @@
+```jsx
+import { Outlet } from "react-router-dom";
+
 import Header from "../header/header";
 import Sidebar from "../sidebar/sidebar";
 
-const Layout = ({ children }) => {
+const Layout = () => {
   return (
     <div className="w-full min-h-screen bg-[#F4F8FC]">
 
@@ -16,7 +19,7 @@ const Layout = ({ children }) => {
 
         {/* Main Content */}
         <main className="flex-1 min-w-0">
-          {children}
+          <Outlet />
         </main>
 
       </div>
@@ -26,3 +29,4 @@ const Layout = ({ children }) => {
 };
 
 export default Layout;
+```

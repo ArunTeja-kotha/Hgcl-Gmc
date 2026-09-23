@@ -1,14 +1,11 @@
 import { Routes, Route } from "react-router-dom";
 
-import Layout from "./layouts/layout/layout";
-import Dashboard from "./pages/dashboard/Dashboard";
+import Register from "./pages/register/register";
 
 function App() {
   return (
     <Routes>
-      <Route element={<Layout />}>
-        <Route path="/" element={<Dashboard />} />
-      </Route>
+      <Route path="/" element={<Register />} />
     </Routes>
   );
 }
