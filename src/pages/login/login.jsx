@@ -1,9 +1,55 @@
-import {Link} from "react-router-dom";
+import { Link, useNavigate} from "react-router-dom";
 import React, { useState } from "react";
+import axios from "axios";
 import loginBackground from "../../assets/gmclogin.png";
 
 const Login = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+ const handleLogin = async (e) => {
+  e.preventDefault();
+
+  try {
+    const response = await axios.post(
+      "http://localhost:5163/api/Auth/login",
+      {
+        email: email,
+        password: password,
+      }
+    );
+
+    console.log("Login successful:", response.data);
+
+    const token = response.data.token;
+
+    // Store JWT token
+    localStorage.setItem("token", token);
+
+    // Navigate to dashboard
+    navigate("/dashboard");
+
+  } catch (error) {
+    console.error("Login failed:", error);
+
+    if (error.response) {
+      console.error("Status:", error.response.status);
+      console.error("Response:", error.response.data);
+
+      alert(
+        error.response.data?.message ||
+        "Invalid email or password."
+      );
+    } else {
+      console.error("Network Error:", error.message);
+
+      alert("Unable to connect to the server.");
+    }
+  }
+};
 
   return (
     <div
@@ -44,7 +90,12 @@ const Login = () => {
             Hyderabad Growth Corridor Limited
           </p>
         </div>
-        <form className="space-y-5">
+
+        <form
+          className="space-y-5"
+          onSubmit={handleLogin}
+        >
+          {/* ================= Email ================= */}
           <div>
             <label
               htmlFor="email"
@@ -57,6 +108,8 @@ const Login = () => {
               type="text"
               id="email"
               name="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your Email / User ID"
               className="
                 block
@@ -79,6 +132,8 @@ const Login = () => {
               "
             />
           </div>
+
+          {/* ================= Password ================= */}
           <div>
             <label
               htmlFor="password"
@@ -92,6 +147,8 @@ const Login = () => {
                 type={showPassword ? "text" : "password"}
                 id="password"
                 name="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your Password"
                 className="
                   block
@@ -114,9 +171,12 @@ const Login = () => {
                   focus:ring-blue-100
                 "
               />
+
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() =>
+                  setShowPassword(!showPassword)
+                }
                 className="
                   absolute
                   right-3
@@ -135,33 +195,41 @@ const Login = () => {
               </button>
             </div>
           </div>
-          {/* Sign In */}
+
+          {/* ================= Sign In ================= */}
           <button
-            type="button"
+            type="submit"
             className="
               w-full
               h-11
               rounded-md
-             bg-[#2563A6]
+              bg-[#2563A6]
               text-white
               text-sm
               font-semibold
               transition
               duration-200
-            hover:bg-[#1D4F85]
+              hover:bg-[#1D4F85]
               active:scale-95
               cursor-pointer
             "
           >
-            Sign In
+            Log In
           </button>
         </form>
+
+        {/* ================= Register ================= */}
         <div className="mt-6 text-center">
-          <p className="text-center text-sm text-[#64748B] px-6"> Don't have an account?{" "} 
-                <Link to="/register" className="font-semibold text-[#2563A6] hover:text-[#1D4F85]" > 
-                Register 
-                </Link>
-                 </p>
+          <p className="text-center text-sm text-[#64748B] px-6">
+            Don't have an account?{" "}
+
+            <Link
+              to="/register"
+              className="font-semibold text-[#2563A6] hover:text-[#1D4F85]"
+            >
+              Register
+            </Link>
+          </p>
         </div>
       </div>
     </div>
