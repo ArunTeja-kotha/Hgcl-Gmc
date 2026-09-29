@@ -1,7 +1,7 @@
 const Dashboard = () => {
   return (
     <div className="w-full min-h-[calc(100vh-4.5rem)] p-6">
-      <h1 className="text-2xl font-semibold text-[#1F2937]">
+      <h1 className="text-3xl font-semibold text-[#1F2937]">
         Dashboard
       </h1>
 

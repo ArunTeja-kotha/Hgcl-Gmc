@@ -1,9 +1,9 @@
+import { Link } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import registrationBackground from "../../assets/gmcregistration.png";
 
-// Validation
 const validationSchema = Yup.object({
   firstName: Yup.string()
     .required("First name is required")
@@ -21,7 +21,7 @@ const validationSchema = Yup.object({
     .required("Email is required")
     .email("Enter a valid email address"),
 
-  phone: Yup.string()
+  phoneNumber: Yup.string()
     .required("Phone number is required")
     .matches(/^[6-9]\d{9}$/, "Enter a valid 10-digit phone number"),
 
@@ -32,67 +32,101 @@ const validationSchema = Yup.object({
     .matches(/[a-z]/, "Must contain at least one lowercase letter")
     .matches(/[0-9]/, "Must contain at least one number")
     .matches(
-      /[!@#$%^&*(),.?":{}|<>_\-\\[\]\/`~;'=+]/,
+      /[!@#$%^&*(),.?":{}|<>\_\-\\[\]\/`~;'=+]/,
       "Must contain at least one special character"
     ),
 });
 
 function Register() {
-  // Initial form values
   const initialValues = {
     firstName: "",
     lastName: "",
     email: "",
-    phone: "",
+    phoneNumber: "",
     password: "",
   };
 
-  // Form submit
-  const handleSubmit = (values) => {
-    console.log("Form submitted:", values);
+  const handleSubmit = async (values) => {
+    console.log("FORM SUBMITTED:", values);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5163/api/citizens/register",
+        values
+      );
+
+      console.log("Registration successful:", response.data);
+
+      alert("Registration successful!");
+    } catch (error) {
+      console.error("Registration failed:", error);
+
+      if (error.response) {
+        console.error("Status:", error.response.status);
+        console.error("Full Response:", error.response.data);
+
+        // ASP.NET Core validation errors
+        if (error.response.data?.errors) {
+          console.error(
+            "Validation Errors:",
+            error.response.data.errors
+          );
+
+          Object.entries(error.response.data.errors).forEach(
+            ([field, messages]) => {
+              console.error(`${field}:`, messages);
+            }
+          );
+        }
+
+        // Backend message if available
+        if (error.response.data?.message) {
+          console.error(
+            "Backend Message:",
+            error.response.data.message
+          );
+        }
+      } else {
+        console.error("Network Error:", error.message);
+      }
+    }
   };
 
   return (
-    <div className="relative min-h-screen w-full">
-
-      {/* Full Screen Background Image */}
+    <div className="relative h-screen w-full overflow-hidden">
       <div
-        className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
+        className="fixed inset-0 h-full w-full bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage: `url(${registrationBackground})`,
         }}
       ></div>
 
-      {/* Form Container */}
-      <div className="relative z-10 min-h-screen w-full flex items-center justify-end pr-24 py-6">
+      <div className="relative z-8 ml-auto mr-15 flex w-full max-w-sm items-center justify-center pt-7">
+        <div className="w-full rounded-2xl bg-white p-10 shadow-2xl">
 
-        {/* Registration Card */}
-        <div className="w-full max-w-md bg-[#FFFFFF] rounded-2xl shadow-2xl p-3">
-
-          {/* Heading */}
-          <div className="text-center mb-3">
-            <h1 className="text-md font-bold text-[#123A63]">
+          <div className="mb-2 text-center">
+            <h1 className="text-2xl font-bold text-blue-950">
               Registration
             </h1>
 
-            <p className="mt-2 text-[#64748B]">
+            <p className="mt-1 text-sm text-[#64748B]">
               Register your account to get started
             </p>
           </div>
 
-          {/* Formik */}
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
           >
-            <Form className="space-y-3">
+            <Form className="space-y-0">
 
-              {/* First Name */}
+              {/* ================= First Name ================= */}
+
               <div>
                 <label
                   htmlFor="firstName"
-                  className="block mb-2 text-sm font-medium text-[#1F2937]"
+                  className="mb-1 block text-sm font-medium text-[#1F2937]"
                 >
                   First Name
                 </label>
@@ -102,21 +136,24 @@ function Register() {
                   id="firstName"
                   name="firstName"
                   placeholder="Enter your first name"
-                  className="w-full px-4 py-3 border border-[#D5E0EA] rounded-lg text-[#1F2937] outline-none focus:border-[#2563A6] focus:ring-2 focus:ring-[#B9D8F2]"
+                  className="w-full rounded-lg border border-[#D5E0EA] px-3 py-1.5 text-sm text-[#1F2937] outline-none focus:border-[#2563A6] focus:ring-2 focus:ring-[#B9D8F2]"
                 />
 
-                <ErrorMessage
-                  name="firstName"
-                  component="div"
-                  className="mt-1 text-sm text-[#C94A4A]"
-                />
+                <div className="h-3">
+                  <ErrorMessage
+                    name="firstName"
+                    component="div"
+                    className="text-[11px] text-[#C94A4A]"
+                  />
+                </div>
               </div>
 
-              {/* Last Name */}
+              {/* ================= Last Name ================= */}
+
               <div>
                 <label
                   htmlFor="lastName"
-                  className="block mb-2 text-sm font-medium text-[#1F2937]"
+                  className="mb-1 block text-sm font-medium text-[#1F2937]"
                 >
                   Last Name
                 </label>
@@ -126,21 +163,24 @@ function Register() {
                   id="lastName"
                   name="lastName"
                   placeholder="Enter your last name"
-                  className="w-full px-4 py-3 border border-[#D5E0EA] rounded-lg text-[#1F2937] outline-none focus:border-[#2563A6] focus:ring-2 focus:ring-[#B9D8F2]"
+                  className="w-full rounded-lg border border-[#D5E0EA] px-3 py-1.5 text-sm text-[#1F2937] outline-none focus:border-[#2563A6] focus:ring-2 focus:ring-[#B9D8F2]"
                 />
 
-                <ErrorMessage
-                  name="lastName"
-                  component="div"
-                  className="mt-1 text-sm text-[#C94A4A]"
-                />
+                <div className="h-3">
+                  <ErrorMessage
+                    name="lastName"
+                    component="div"
+                    className="text-[11px] text-[#C94A4A]"
+                  />
+                </div>
               </div>
 
-              {/* Email */}
+              {/* ================= Email ================= */}
+
               <div>
                 <label
                   htmlFor="email"
-                  className="block mb-2 text-sm font-medium text-[#1F2937]"
+                  className="mb-1 block text-sm font-medium text-[#1F2937]"
                 >
                   Email
                 </label>
@@ -150,46 +190,52 @@ function Register() {
                   id="email"
                   name="email"
                   placeholder="Enter your email"
-                  className="w-full px-4 py-3 border border-[#D5E0EA] rounded-lg text-[#1F2937] outline-none focus:border-[#2563A6] focus:ring-2 focus:ring-[#B9D8F2]"
+                  className="w-full rounded-lg border border-[#D5E0EA] px-3 py-1.5 text-sm text-[#1F2937] outline-none focus:border-[#2563A6] focus:ring-2 focus:ring-[#B9D8F2]"
                 />
 
-                <ErrorMessage
-                  name="email"
-                  component="div"
-                  className="mt-1 text-sm text-[#C94A4A]"
-                />
+                <div className="h-3">
+                  <ErrorMessage
+                    name="email"
+                    component="div"
+                    className="text-[11px] text-[#C94A4A]"
+                  />
+                </div>
               </div>
 
-              {/* Phone Number */}
+              {/* ================= Phone ================= */}
+
               <div>
                 <label
                   htmlFor="phone"
-                  className="block mb-2 text-sm font-medium text-[#1F2937]"
+                  className="mb-1 block text-sm font-medium text-[#1F2937]"
                 >
                   Phone Number
                 </label>
 
                 <Field
                   type="tel"
-                  id="phone"
-                  name="phone"
+                  id="phoneNumber"
+                  name="phoneNumber"
                   placeholder="Enter your 10-digit phone number"
                   maxLength="10"
-                  className="w-full px-4 py-3 border border-[#D5E0EA] rounded-lg text-[#1F2937] outline-none focus:border-[#2563A6] focus:ring-2 focus:ring-[#B9D8F2]"
+                  className="w-full rounded-lg border border-[#D5E0EA] px-3 py-1.5 text-sm text-[#1F2937] outline-none focus:border-[#2563A6] focus:ring-2 focus:ring-[#B9D8F2]"
                 />
 
-                <ErrorMessage
-                  name="phone"
-                  component="div"
-                  className="mt-1 text-sm text-[#C94A4A]"
-                />
+                <div className="h-3">
+                  <ErrorMessage
+                    name="phoneNumber"
+                    component="div"
+                    className="text-[11px] text-[#C94A4A]"
+                  />
+                </div>
               </div>
 
-              {/* Password */}
+              {/* ================= Password ================= */}
+
               <div>
                 <label
                   htmlFor="password"
-                  className="block mb-2 text-sm font-medium text-[#1F2937]"
+                  className="mb-1 block text-sm font-medium text-[#1F2937]"
                 >
                   Password
                 </label>
@@ -199,27 +245,42 @@ function Register() {
                   id="password"
                   name="password"
                   placeholder="Enter your password"
-                  className="w-full px-4 py-3 border border-[#D5E0EA] rounded-lg text-[#1F2937] outline-none focus:border-[#2563A6] focus:ring-2 focus:ring-[#B9D8F2]"
+                  className="w-full rounded-lg border border-[#D5E0EA] px-3 py-1.5 text-sm text-[#1F2937] outline-none focus:border-[#2563A6] focus:ring-2 focus:ring-[#B9D8F2]"
                 />
 
-                <ErrorMessage
-                  name="password"
-                  component="div"
-                  className="mt-1 text-sm text-[#C94A4A]"
-                />
+                <div className="h-3">
+                  <ErrorMessage
+                    name="password"
+                    component="div"
+                    className="text-[11px] text-[#C94A4A]"
+                  />
+                </div>
               </div>
 
-              {/* Register Button */}
+              {/* ================= Register Button ================= */}
+
               <button
                 type="submit"
-                className="w-full py-3 px-4 bg-[#2563A6] text-[#FFFFFF] font-semibold rounded-lg hover:bg-[#1D4F85] transition duration-200"
+                className="w-full rounded-lg bg-[#2563A6] px-4 py-1.5 font-semibold text-white transition duration-200 hover:bg-[#1D4F85]"
               >
                 Register
               </button>
 
+              {/* ================= Login Link ================= */}
+
+              <p className="pt-1 text-center text-sm text-[#64748B]">
+                Already have an account?{" "}
+
+                <Link
+                  to="/"
+                  className="font-semibold text-[#2563A6] hover:text-[#1D4F85]"
+                >
+                  Login
+                </Link>
+              </p>
+
             </Form>
           </Formik>
-
         </div>
       </div>
     </div>

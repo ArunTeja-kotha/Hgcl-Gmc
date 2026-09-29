@@ -1,59 +1,54 @@
-import React from "react";
-
+import {Link} from "react-router-dom";
+import React, { useState } from "react";
 import loginBackground from "../../assets/gmclogin.png";
 
 const Login = () => {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
-<div
-  className="
-    min-h-screen
-    w-full
-    flex
-    items-center
-    bg-cover
-    bg-center
-    bg-no-repeat
-    pl-[55%]
-  "
-  style={{
-    backgroundImage: `url(${loginBackground})`,
-  }}
->
+    <div
+      className="
+        min-h-screen
+        w-full
+        flex
+        items-center
+        justify-end
+        bg-cover
+        bg-center
+        bg-no-repeat
+        px-10
+      "
+      style={{
+        backgroundImage: `url(${loginBackground})`,
+      }}
+    >
       <div
         className="
-          w-full max-w-[400px]
-          p-[40px]
-          rounded-[14px]
-          border border-[#c9d9e8]
-         bg-[rgba(242,247,252,0.99)]
-          shadow-[0_14px_40px_rgba(18,58,99,0.20)]
-          backdrop-blur-[8px]
+          w-full
+          max-w-md
+          mr-10
+          p-10
+          rounded-xl
+          border
+          border-slate-300
+          bg-slate-50
+          shadow-xl
         "
       >
-        {/* Header */}
         <div className="text-center mb-7">
-          <h1 className="text-[25px] font-bold text-[#17365d]">
+          <h1 className="text-2xl font-bold text-blue-950">
             Grievance Management System
           </h1>
 
-          <p className="mt-2 text-[14px] text-[#6b7280]">
+          <p className="mt-2 text-sm text-gray-500">
             Hyderabad Growth Corridor Limited
           </p>
         </div>
-
-        {/* Login Form */}
         <form className="space-y-5">
-
-          {/* Email / User ID */}
           <div>
             <label
               htmlFor="email"
-              className="
-                block mb-2
-                text-[14px]
-                font-medium
-                text-[#374151]
-              "
+              className="block mb-2 text-sm font-medium text-gray-700"
             >
               Email / User ID
             </label>
@@ -64,151 +59,109 @@ const Login = () => {
               name="email"
               placeholder="Enter your Email / User ID"
               className="
-                block w-full h-[44px] box-border
-                px-[13px]
-                rounded-[7px]
-                border border-[#9fb3c6]
+                block
+                w-full
+                h-11
+                box-border
+                px-3
+                rounded-md
+                border
+                border-slate-400
                 bg-white
-                text-[14px]
-                text-[#1f2937]
+                text-sm
+                text-gray-800
                 outline-none
-
-                placeholder:text-[#9aa8b6]
-                placeholder:opacity-100
-
-                hover:border-[#7f98ae]
-
-                focus:border-[#2563a6]
-                focus:shadow-[0_0_0_3px_rgba(37,99,166,0.10)]
+                placeholder:text-slate-400
+                hover:border-slate-500
+                focus:border-blue-600
+                focus:ring-2
+                focus:ring-blue-100
               "
             />
           </div>
-
-          {/* Password */}
           <div>
             <label
               htmlFor="password"
-              className="
-                block mb-2
-                text-[14px]
-                font-medium
-                text-[#374151]
-              "
+              className="block mb-2 text-sm font-medium text-gray-700"
             >
               Password
             </label>
 
             <div className="relative">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 id="password"
                 name="password"
                 placeholder="Enter your Password"
                 className="
-                  block w-full h-[44px] box-border
-                  px-[13px] pr-[60px]
-                  rounded-[7px]
-                  border border-[#9fb3c6]
+                  block
+                  w-full
+                  h-11
+                  box-border
+                  px-3
+                  pr-16
+                  rounded-md
+                  border
+                  border-slate-400
                   bg-white
-                  text-[14px]
-                  text-[#1f2937]
+                  text-sm
+                  text-gray-800
                   outline-none
-
-                  placeholder:text-[#9aa8b6]
-                  placeholder:opacity-100
-
-                  hover:border-[#7f98ae]
-
-                  focus:border-[#2563a6]
-                  focus:shadow-[0_0_0_3px_rgba(37,99,166,0.10)]
+                  placeholder:text-slate-400
+                  hover:border-slate-500
+                  focus:border-blue-600
+                  focus:ring-2
+                  focus:ring-blue-100
                 "
               />
-
-              {/* Show Password UI */}
               <button
                 type="button"
+                onClick={() => setShowPassword(!showPassword)}
                 className="
                   absolute
-                  right-[12px]
+                  right-3
                   top-1/2
                   -translate-y-1/2
-                  text-[13px]
+                  text-xs
                   font-medium
-                  text-[#2563a6]
+                  text-blue-600
                   bg-transparent
                   border-0
                   cursor-pointer
+                  hover:text-blue-800
                 "
               >
-                Show
+                {showPassword ? "Hide" : "Show"}
               </button>
             </div>
           </div>
-
-          {/* Forgot Password */}
-          <div className="flex justify-end">
-            <button
-              type="button"
-              className="
-                text-[13px]
-                font-medium
-                text-[#2563a6]
-                hover:text-[#1d4f85]
-                hover:underline
-                bg-transparent
-                border-0
-                cursor-pointer
-              "
-            >
-              Forgot Password?
-            </button>
-          </div>
-
           {/* Sign In */}
           <button
             type="button"
             className="
               w-full
-              h-[44px]
-              rounded-[7px]
-              bg-[#2563a6]
+              h-11
+              rounded-md
+             bg-[#2563A6]
               text-white
-              text-[14px]
+              text-sm
               font-semibold
               transition
               duration-200
-              hover:bg-[#1d4f85]
-              active:scale-[0.99]
+            hover:bg-[#1D4F85]
+              active:scale-95
               cursor-pointer
             "
           >
             Sign In
           </button>
-
         </form>
-
-        {/* Register */}
         <div className="mt-6 text-center">
-          <span className="text-[13px] text-[#6b7280]">
-            Don't have an account?
-          </span>
-
-          <button
-            type="button"
-            className="
-              ml-1
-              text-[13px]
-              font-semibold
-              text-[#2563a6]
-              hover:text-[#1d4f85]
-              hover:underline
-              bg-transparent
-              border-0
-              cursor-pointer
-            "
-          >
-            Register
-          </button>
+          <p className="text-center text-sm text-[#64748B] px-6"> Don't have an account?{" "} 
+                <Link to="/register" className="font-semibold text-[#2563A6] hover:text-[#1D4F85]" > 
+                Register 
+                </Link>
+                 </p>
         </div>
       </div>
     </div>
