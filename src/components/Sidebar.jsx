@@ -16,8 +16,6 @@ const Sidebar = ({ isOpen, onToggle, menus = [] }) => {
         duration-300
       `}
     >
-
-      {/* Sidebar Header */}
       <div
         className={`
           h-14
@@ -29,14 +27,14 @@ const Sidebar = ({ isOpen, onToggle, menus = [] }) => {
         `}
       >
 
-        {/* GMS */}
+      
         {isOpen && (
           <span className="text-xl font-bold">
             GMS
           </span>
         )}
 
-        {/* Three Bars */}
+
         <button
           type="button"
           onClick={onToggle}
@@ -57,14 +55,10 @@ const Sidebar = ({ isOpen, onToggle, menus = [] }) => {
         </button>
 
       </div>
-
-      {/* Menu */}
-      <nav className="flex-1 p-3 overflow-y-auto">
+      <nav className="flex-4 p-4 overflow-y-auto">
 
         {menus.map((menu) => (
           <div key={menu.menuId} className="mb-2">
-
-            {/* Main Menu */}
             <Link
               to={menu.route}
               title={!isOpen ? menu.name : ""}
@@ -79,13 +73,10 @@ const Sidebar = ({ isOpen, onToggle, menus = [] }) => {
                 transition
               "
             >
-
-              {/* Icon */}
               <span className="text-xl w-6 min-w-6 text-center">
                 {menu.icon || "▣"}
               </span>
 
-              {/* Name */}
               {isOpen && (
                 <span className="text-sm font-medium whitespace-nowrap">
                   {menu.name}
@@ -93,8 +84,6 @@ const Sidebar = ({ isOpen, onToggle, menus = [] }) => {
               )}
 
             </Link>
-
-            {/* Child Menus */}
             {isOpen &&
               menu.children &&
               menu.children.length > 0 && (

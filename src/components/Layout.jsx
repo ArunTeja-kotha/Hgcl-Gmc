@@ -11,7 +11,7 @@ const Layout = () => {
         <Header />
 
         <main>
-          {/* Page content will come here */}
+        
         </main>
       </div>
 
