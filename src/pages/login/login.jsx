@@ -50,10 +50,6 @@ const Login = () => {
       return null;
     }
   };
-
-  // ============================================
-  // Login
-  // ============================================
   const handleLogin = async (e) => {
     e.preventDefault();
 
@@ -67,25 +63,12 @@ const Login = () => {
       );
 
       console.log("Login successful:", response.data);
-
-      // ============================================
-      // Get Token
-      // ============================================
       const token = response.data.token;
-
-      // Store JWT token
       localStorage.setItem("token", token);
-
-      // ============================================
-      // Get Role / Account Type from JWT
-      // ============================================
       const role = getRoleFromToken(token);
-
       console.log("Logged in role:", role);
 
-      // ============================================
-      // Store Role
-      // ============================================
+
       if (role) {
         localStorage.setItem("role", role);
       } else {
@@ -93,9 +76,6 @@ const Login = () => {
         console.warn("No role or account type found in JWT.");
       }
 
-      // ============================================
-      // Navigate to Dashboard
-      // ============================================
       navigate("/dashboard");
     } catch (error) {
       console.error("Login failed:", error);
@@ -146,8 +126,6 @@ const Login = () => {
           shadow-xl
         "
       >
-        {/* ================= Header ================= */}
-
         <div className="text-center mb-7">
           <h1 className="text-2xl font-bold text-blue-950">
             Grievance Management System
@@ -157,15 +135,10 @@ const Login = () => {
             Hyderabad Growth Corridor Limited
           </p>
         </div>
-
-        {/* ================= Login Form ================= */}
-
         <form
           className="space-y-5"
           onSubmit={handleLogin}
         >
-          {/* ================= Email ================= */}
-
           <div>
             <label
               htmlFor="email"
@@ -202,9 +175,6 @@ const Login = () => {
               "
             />
           </div>
-
-          {/* ================= Password ================= */}
-
           <div>
             <label
               htmlFor="password"
@@ -265,8 +235,6 @@ const Login = () => {
             </div>
           </div>
 
-          {/* ================= Login Button ================= */}
-
           <button
             type="submit"
             className="
@@ -287,9 +255,6 @@ const Login = () => {
             Log In
           </button>
         </form>
-
-        {/* ================= Register ================= */}
-
         <div className="mt-6 text-center">
           <p className="text-center text-sm text-[#64748B] px-6">
             Don't have an account?{" "}

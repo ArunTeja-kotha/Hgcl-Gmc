@@ -18,8 +18,6 @@ const Header = () => {
         </h1>
 
       </div>
-
-      {/* User */}
       <div className="flex items-center gap-3">
 
         <div className="h-9 w-9 rounded-full bg-[#E8F2FB] flex items-center justify-center text-[#123A63] font-semibold">

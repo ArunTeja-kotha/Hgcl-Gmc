@@ -6,11 +6,12 @@ const Sidebar = ({ isOpen, onToggle, menus = [] }) => {
 
   const [openMenus, setOpenMenus] = useState({});
 
+  //Logout and navigating to the Login page 
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/");
   };
-
+  // it changes the state of the menu clicked 
   const toggleMenu = (menuId) => {
     setOpenMenus((previous) => ({
       ...previous,
@@ -44,7 +45,7 @@ const Sidebar = ({ isOpen, onToggle, menus = [] }) => {
       >
         {isOpen && (
           <span className="text-xl font-bold">
-            GMS
+           GMS
           </span>
         )}
 
@@ -99,9 +100,6 @@ const Sidebar = ({ isOpen, onToggle, menus = [] }) => {
                     text-left
                   "
                 >
-                  <span className="text-xl w-6 min-w-6 text-center">
-                    {menu.icon || "▣"}
-                  </span>
                   {isOpen && (
                     <span className="text-sm font-medium whitespace-nowrap flex-1">
                       {menu.name}
@@ -109,7 +107,7 @@ const Sidebar = ({ isOpen, onToggle, menus = [] }) => {
                   )}
                   {isOpen && (
                     <span className="text-sm">
-                      {isMenuOpen ? "⌃" : "⌄"}
+                      {isMenuOpen ? "" : ""}
                     </span>
                   )}
                 </button>
@@ -128,10 +126,6 @@ const Sidebar = ({ isOpen, onToggle, menus = [] }) => {
                     transition
                   "
                 >
-                  <span className="text-xl w-6 min-w-6 text-center">
-                    {menu.icon || "▣"}
-                  </span>
-
                   {isOpen && (
                     <span className="text-sm font-medium whitespace-nowrap">
                       {menu.name}
