@@ -29,7 +29,6 @@ const Login = () => {
     // Store JWT token
     localStorage.setItem("token", token);
 
-    // Navigate to dashboard
     navigate("/dashboard");
 
   } catch (error) {
@@ -195,8 +194,6 @@ const Login = () => {
               </button>
             </div>
           </div>
-
-          {/* ================= Sign In ================= */}
           <button
             type="submit"
             className="
@@ -217,8 +214,6 @@ const Login = () => {
             Log In
           </button>
         </form>
-
-        {/* ================= Register ================= */}
         <div className="mt-6 text-center">
           <p className="text-center text-sm text-[#64748B] px-6">
             Don't have an account?{" "}

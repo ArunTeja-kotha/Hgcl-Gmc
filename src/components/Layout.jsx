@@ -1,20 +1,30 @@
+import React, { useState } from "react";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
+import sidebarConfig from "../config/sidebarConfig";
 
-const Layout = () => {
+const Layout = ({ children }) => {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const role = "SuperAdmin";
+
+  const menus = sidebarConfig[role] || [];
+
   return (
-    <div className="flex min-h-screen">
+    <div className="min-h-screen bg-[#F4F8FC]">
+      <Header />
 
-      <Sidebar />
+      <div className="flex">
+        <Sidebar
+          isOpen={sidebarOpen}
+          onToggle={() => setSidebarOpen((previous) => !previous)}
+          menus={menus}
+        />
 
-      <div className="flex-1">
-        <Header />
-
-        <main>
-          {/* Page content will come here */}
+        <main className="flex-1 min-w-0 min-h-[calc(100vh-5rem)]">
+          {children}
         </main>
       </div>
-
     </div>
   );
 };
