@@ -23,6 +23,7 @@ const AppRoutes = () => {
         element={<Register />}
       />
 
+
       {/* Dashboard inside Layout */}
       <Route
         path="/dashboard"
@@ -34,6 +35,7 @@ const AppRoutes = () => {
       />
 
     </Routes>
+    
   );
 };
 
