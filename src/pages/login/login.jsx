@@ -1,54 +1,120 @@
-import { Link, useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import React, { useState } from "react";
 import axios from "axios";
 import loginBackground from "../../assets/gmclogin.png";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
 
+  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
- const handleLogin = async (e) => {
-  e.preventDefault();
+  // ============================================
+  // Get Role / Account Type from JWT Token
+  // ============================================
+  const getRoleFromToken = (token) => {
+    try {
+      const payload = token.split(".")[1];
 
-  try {
-    const response = await axios.post(
-      "http://localhost:5163/api/Auth/login",
-      {
-        email: email,
-        password: password,
-      }
-    );
-
-    console.log("Login successful:", response.data);
-
-    const token = response.data.token;
-
-    // Store JWT token
-    localStorage.setItem("token", token);
-
-    navigate("/dashboard");
-
-  } catch (error) {
-    console.error("Login failed:", error);
-
-    if (error.response) {
-      console.error("Status:", error.response.status);
-      console.error("Response:", error.response.data);
-
-      alert(
-        error.response.data?.message ||
-        "Invalid email or password."
+      const decodedPayload = JSON.parse(
+        atob(payload.replace(/-/g, "+").replace(/_/g, "/"))
       );
-    } else {
-      console.error("Network Error:", error.message);
 
-      alert("Unable to connect to the server.");
+      console.log("JWT Payload:", decodedPayload);
+
+      // --------------------------------------------
+      // 1. Check normal role claim
+      // --------------------------------------------
+      const role =
+        decodedPayload.role ||
+        decodedPayload[
+          "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+        ];
+
+      if (role) {
+        return role;
+      }
+
+      // --------------------------------------------
+      // 2. Citizen JWT does not have Role claim
+      //    So check AccountType
+      // --------------------------------------------
+      if (decodedPayload.AccountType === "Citizen") {
+        return "Citizen";
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Unable to decode JWT:", error);
+      return null;
     }
-  }
-};
+  };
+
+  // ============================================
+  // Login
+  // ============================================
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5163/api/Auth/login",
+        {
+          email: email,
+          password: password,
+        }
+      );
+
+      console.log("Login successful:", response.data);
+
+      // ============================================
+      // Get Token
+      // ============================================
+      const token = response.data.token;
+
+      // Store JWT token
+      localStorage.setItem("token", token);
+
+      // ============================================
+      // Get Role / Account Type from JWT
+      // ============================================
+      const role = getRoleFromToken(token);
+
+      console.log("Logged in role:", role);
+
+      // ============================================
+      // Store Role
+      // ============================================
+      if (role) {
+        localStorage.setItem("role", role);
+      } else {
+        localStorage.removeItem("role");
+        console.warn("No role or account type found in JWT.");
+      }
+
+      // ============================================
+      // Navigate to Dashboard
+      // ============================================
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Login failed:", error);
+
+      if (error.response) {
+        console.error("Status:", error.response.status);
+        console.error("Response:", error.response.data);
+
+        alert(
+          error.response.data?.message ||
+            "Invalid email or password."
+        );
+      } else {
+        console.error("Network Error:", error.message);
+
+        alert("Unable to connect to the server.");
+      }
+    }
+  };
 
   return (
     <div
@@ -80,6 +146,8 @@ const Login = () => {
           shadow-xl
         "
       >
+        {/* ================= Header ================= */}
+
         <div className="text-center mb-7">
           <h1 className="text-2xl font-bold text-blue-950">
             Grievance Management System
@@ -90,11 +158,14 @@ const Login = () => {
           </p>
         </div>
 
+        {/* ================= Login Form ================= */}
+
         <form
           className="space-y-5"
           onSubmit={handleLogin}
         >
           {/* ================= Email ================= */}
+
           <div>
             <label
               htmlFor="email"
@@ -133,6 +204,7 @@ const Login = () => {
           </div>
 
           {/* ================= Password ================= */}
+
           <div>
             <label
               htmlFor="password"
@@ -173,9 +245,7 @@ const Login = () => {
 
               <button
                 type="button"
-                onClick={() =>
-                  setShowPassword(!showPassword)
-                }
+                onClick={() => setShowPassword(!showPassword)}
                 className="
                   absolute
                   right-3
@@ -194,6 +264,9 @@ const Login = () => {
               </button>
             </div>
           </div>
+
+          {/* ================= Login Button ================= */}
+
           <button
             type="submit"
             className="
@@ -214,6 +287,9 @@ const Login = () => {
             Log In
           </button>
         </form>
+
+        {/* ================= Register ================= */}
+
         <div className="mt-6 text-center">
           <p className="text-center text-sm text-[#64748B] px-6">
             Don't have an account?{" "}

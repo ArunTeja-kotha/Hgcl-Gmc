@@ -5,11 +5,18 @@ import sidebarConfig from "../config/sidebarConfig";
 
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  const role = "SuperAdmin";
-
-  const menus = sidebarConfig[role] || [];
-
+  const storedRole = localStorage.getItem("role");
+  const role = storedRole?.replace(/\s+/g, " ").trim();
+  const roleMap = {
+    "Super Administrator": "SuperAdmin",
+    "Web Administrator": "WebAdmin",
+    "TMS User": "TMSUser",
+    "Web User": "WebUser",
+    "Nodal Officer": "NodalOfficer",
+    Citizen: "Citizen",
+  };
+  const sidebarRole = roleMap[role] || role;
+  const menus = sidebarConfig[sidebarRole] || [];
   return (
     <div className="min-h-screen bg-[#F4F8FC]">
       <Header />
