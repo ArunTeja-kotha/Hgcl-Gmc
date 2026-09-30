@@ -64,8 +64,6 @@ function Register() {
       if (error.response) {
         console.error("Status:", error.response.status);
         console.error("Full Response:", error.response.data);
-
-        // ASP.NET Core validation errors
         if (error.response.data?.errors) {
           console.error(
             "Validation Errors:",
@@ -78,8 +76,6 @@ function Register() {
             }
           );
         }
-
-        // Backend message if available
         if (error.response.data?.message) {
           console.error(
             "Backend Message:",
@@ -120,9 +116,6 @@ function Register() {
             onSubmit={handleSubmit}
           >
             <Form className="space-y-0">
-
-              {/* ================= First Name ================= */}
-
               <div>
                 <label
                   htmlFor="firstName"
@@ -147,9 +140,6 @@ function Register() {
                   />
                 </div>
               </div>
-
-              {/* ================= Last Name ================= */}
-
               <div>
                 <label
                   htmlFor="lastName"
@@ -174,8 +164,6 @@ function Register() {
                   />
                 </div>
               </div>
-
-              {/* ================= Email ================= */}
 
               <div>
                 <label
@@ -202,8 +190,6 @@ function Register() {
                 </div>
               </div>
 
-              {/* ================= Phone ================= */}
-
               <div>
                 <label
                   htmlFor="phone"
@@ -229,9 +215,6 @@ function Register() {
                   />
                 </div>
               </div>
-
-              {/* ================= Password ================= */}
-
               <div>
                 <label
                   htmlFor="password"
@@ -257,16 +240,12 @@ function Register() {
                 </div>
               </div>
 
-              {/* ================= Register Button ================= */}
-
               <button
                 type="submit"
                 className="w-full rounded-lg bg-[#2563A6] px-4 py-1.5 font-semibold text-white transition duration-200 hover:bg-[#1D4F85]"
               >
                 Register
               </button>
-
-              {/* ================= Login Link ================= */}
 
               <p className="pt-1 text-center text-sm text-[#64748B]">
                 Already have an account?{" "}
