@@ -1,12 +1,28 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 const Sidebar = ({ isOpen, onToggle, menus = [] }) => {
+  const navigate = useNavigate();
+
+  const [openMenus, setOpenMenus] = useState({});
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/");
+  };
+
+  const toggleMenu = (menuId) => {
+    setOpenMenus((previous) => ({
+      ...previous,
+      [menuId]: !previous[menuId],
+    }));
+  };
+
   return (
     <aside
       className={`
-        ${isOpen ? "w-64" : "w-20"}
-        h-[calc(100vh-4rem)]
+        ${isOpen ? "w-80" : "w-20"}
+        h-screen
         bg-[#123A63]
         text-white
         flex
@@ -18,7 +34,7 @@ const Sidebar = ({ isOpen, onToggle, menus = [] }) => {
     >
       <div
         className={`
-          h-14
+          h-20
           flex
           items-center
           border-b
@@ -26,14 +42,11 @@ const Sidebar = ({ isOpen, onToggle, menus = [] }) => {
           ${isOpen ? "justify-between px-4" : "justify-center"}
         `}
       >
-
-      
         {isOpen && (
           <span className="text-xl font-bold">
             GMS
           </span>
         )}
-
 
         <button
           type="button"
@@ -53,74 +66,111 @@ const Sidebar = ({ isOpen, onToggle, menus = [] }) => {
         >
           ☰
         </button>
-
       </div>
-      <nav className="flex-4 p-4 overflow-y-auto">
+      <nav className="flex-1 p-4 overflow-y-auto">
+        {menus.map((menu) => {
+          const hasChildren =
+            menu.children &&
+            menu.children.length > 0;
 
-        {menus.map((menu) => (
-          <div key={menu.menuId} className="mb-2">
-            <Link
-              to={menu.route}
-              title={!isOpen ? menu.name : ""}
-              className="
-                flex
-                items-center
-                gap-4
-                px-3
-                py-3
-                rounded-lg
-                hover:bg-[#2563A6]
-                transition
-              "
+          const isMenuOpen =
+            openMenus[menu.menuId];
+
+          return (
+            <div
+              key={menu.menuId}
+              className="mb-2"
             >
-              <span className="text-xl w-6 min-w-6 text-center">
-                {menu.icon || "▣"}
-              </span>
+              {hasChildren ? (
+                <button
+                  type="button"
+                  onClick={() => toggleMenu(menu.menuId)}
+                  title={!isOpen ? menu.name : ""}
+                  className="
+                    w-full
+                    flex
+                    items-center
+                    gap-4
+                    px-3
+                    py-3
+                    rounded-lg
+                    hover:bg-[#2563A6]
+                    transition
+                    text-left
+                  "
+                >
+                  <span className="text-xl w-6 min-w-6 text-center">
+                    {menu.icon || "▣"}
+                  </span>
+                  {isOpen && (
+                    <span className="text-sm font-medium whitespace-nowrap flex-1">
+                      {menu.name}
+                    </span>
+                  )}
+                  {isOpen && (
+                    <span className="text-sm">
+                      {isMenuOpen ? "⌃" : "⌄"}
+                    </span>
+                  )}
+                </button>
+              ) : (
+                <Link
+                  to={menu.route}
+                  title={!isOpen ? menu.name : ""}
+                  className="
+                    flex
+                    items-center
+                    gap-4
+                    px-3
+                    py-3
+                    rounded-lg
+                    hover:bg-[#2563A6]
+                    transition
+                  "
+                >
+                  <span className="text-xl w-6 min-w-6 text-center">
+                    {menu.icon || "▣"}
+                  </span>
 
-              {isOpen && (
-                <span className="text-sm font-medium whitespace-nowrap">
-                  {menu.name}
-                </span>
+                  {isOpen && (
+                    <span className="text-sm font-medium whitespace-nowrap">
+                      {menu.name}
+                    </span>
+                  )}
+                </Link>
               )}
-
-            </Link>
-            {isOpen &&
-              menu.children &&
-              menu.children.length > 0 && (
-                <div className="ml-8 mt-1">
-
-                  {menu.children.map((child) => (
-                    <Link
-                      key={child.menuId}
-                      to={child.route}
-                      className="
-                        block
-                        px-3
-                        py-2
-                        text-sm
-                        rounded-md
-                        text-blue-100
-                        hover:bg-[#2563A6]
-                        transition
-                      "
-                    >
-                      {child.name}
-                    </Link>
-                  ))}
-
-                </div>
-              )}
-
-          </div>
-        ))}
-
+              {isOpen &&
+                hasChildren &&
+                isMenuOpen && (
+                  <div className="ml-8 mt-1">
+                    {menu.children.map((child) => (
+                      <Link
+                        key={child.menuId}
+                        to={child.route}
+                        className="
+                          block
+                          px-3
+                          py-2
+                          text-sm
+                          rounded-md
+                          text-blue-100
+                          hover:bg-[#2563A6]
+                          transition
+                        "
+                      >
+                        {child.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+            </div>
+          );
+        })}
       </nav>
-
-      {/* Logout */}
       <div className="p-3 border-t border-white/10">
-
         <button
           type="button"
+          onClick={handleLogout}
           className="
             w-full
             flex
@@ -134,7 +184,6 @@ const Sidebar = ({ isOpen, onToggle, menus = [] }) => {
             text-left
           "
         >
-
           <span className="text-xl w-6 min-w-6 text-center">
             ⇥
           </span>
@@ -144,11 +193,8 @@ const Sidebar = ({ isOpen, onToggle, menus = [] }) => {
               Logout
             </span>
           )}
-
         </button>
-
       </div>
-
     </aside>
   );
 };
