@@ -11,22 +11,26 @@ const Layout = ({ children }) => {
   const menus = sidebarConfig[role] || [];
 
   return (
-    <div className="min-h-screen bg-[#F4F8FC]">
+    <div className="h-screen overflow-hidden bg-[#F4F8FC]">
       <Header />
 
-      <div className="flex">
+      <div className="flex h-[calc(100vh-5rem)]">
+        
         <Sidebar
           isOpen={sidebarOpen}
-          onToggle={() => setSidebarOpen((previous) => !previous)}
+          onToggle={() =>
+            setSidebarOpen((previous) => !previous)
+          }
           menus={menus}
         />
 
-        <main className="flex-1 min-w-0 min-h-[calc(100vh-5rem)]">
+        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           {children}
         </main>
+
       </div>
     </div>
   );
 };
 
-export default Layout;              
+export default Layout;
