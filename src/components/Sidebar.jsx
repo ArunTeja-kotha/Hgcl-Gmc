@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 const Sidebar = ({ isOpen, onToggle, menus = [] }) => {
   const navigate = useNavigate();
+  console.log("Sidebar isOpen:", isOpen);
 
   const [openMenus, setOpenMenus] = useState({});
 
@@ -22,7 +23,7 @@ const Sidebar = ({ isOpen, onToggle, menus = [] }) => {
     <aside
       className={`
         ${isOpen ? "w-80" : "w-20"}
-        h-screen
+        h-full
         bg-[#123A63]
         text-white
         flex
