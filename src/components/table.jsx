@@ -17,7 +17,7 @@ const Table = ({
       >
         <AgGridReact
           rowData={rowData}
-          columnDefs={columnDefs}
+          columnDefs={columnDefs} 
           defaultColDef={defaultColDef}
         />
       </div>

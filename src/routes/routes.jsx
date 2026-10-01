@@ -4,6 +4,7 @@ import Login from "../pages/login/login";
 import Register from "../pages/register/register";
 
 import Layout from "../components/Layout";
+import TmsRegisterComplaints from "../pages/tms/tms_register_complaints";
 
 import Dashboard from "../pages/dashboard/dashboard";
 import TmsComplaints from "../pages/tms/tms_complaints";
@@ -43,6 +44,14 @@ const AppRoutes = () => {
           </Layout>
         }
       />
+      <Route
+  path="/tms/grievances/new"
+  element={
+    <Layout>
+      <TmsRegisterComplaints />
+    </Layout>
+  }
+/>
 
     </Routes>
   );
