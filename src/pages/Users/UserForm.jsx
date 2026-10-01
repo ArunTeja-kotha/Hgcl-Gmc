@@ -6,10 +6,10 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
   const [departments, setDepartments] = useState([]);
   const [subdepartments, setSubdepartments] = useState([]);
   const [plazas, setPlazas] = useState([]);
-
   const [loading, setLoading] = useState(false);
   const [loadingSubdepartments, setLoadingSubdepartments] = useState(false);
   const [loadingPlazas, setLoadingPlazas] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const emptyForm = {
     firstName: "",
@@ -33,35 +33,22 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
     },
   };
 
-  // ==========================================
-  // CHECK EDIT MODE
-  // ==========================================
-
   const isEditMode = Boolean(editingUser);
-
-  // ==========================================
-  // LOAD INITIAL DATA
-  // ==========================================
 
   useEffect(() => {
     loadRoles();
     loadDepartments();
   }, []);
 
-  // ==========================================
-  // LOAD EDIT USER DATA
-  // ==========================================
-
   useEffect(() => {
     if (!editingUser) {
-      // Create mode
       setFormData(emptyForm);
       setSubdepartments([]);
       setPlazas([]);
+      setErrors({});
       return;
     }
 
-    // Edit mode
     const departmentId = editingUser.departmentId
       ? String(editingUser.departmentId)
       : "";
@@ -90,17 +77,14 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
       plazaId,
     });
 
-    // Load subdepartments for existing department
+    setErrors({});
+
     if (departmentId) {
       loadSubdepartments(departmentId);
     } else {
       setSubdepartments([]);
     }
   }, [editingUser]);
-
-  // ==========================================
-  // LOAD ROLES
-  // ==========================================
 
   const loadRoles = async () => {
     try {
@@ -109,17 +93,11 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
         authConfig
       );
 
-      console.log("ROLES API RESPONSE:", response.data);
-
       setRoles(response.data);
     } catch (error) {
       console.error("Error loading roles:", error);
     }
   };
-
-  // ==========================================
-  // LOAD DEPARTMENTS
-  // ==========================================
 
   const loadDepartments = async () => {
     try {
@@ -128,17 +106,11 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
         authConfig
       );
 
-      console.log("DEPARTMENT API RESPONSE:", response.data);
-
       setDepartments(response.data);
     } catch (error) {
       console.error("Error loading departments:", error);
     }
   };
-
-  // ==========================================
-  // LOAD PLAZAS
-  // ==========================================
 
   const loadPlazas = async () => {
     setLoadingPlazas(true);
@@ -148,37 +120,14 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
         "http://192.168.1.37:8000/Plazas/"
       );
 
-      console.log("PLAZA API RESPONSE:", response.data);
-
       setPlazas(response.data);
     } catch (error) {
       console.error("Error loading plazas:", error);
-
-      if (error.response) {
-        console.error(
-          "Plaza API response:",
-          error.response.data
-        );
-      } else if (error.request) {
-        console.error(
-          "Plaza API request was sent but no response received."
-        );
-      } else {
-        console.error(
-          "Plaza API request error:",
-          error.message
-        );
-      }
-
       setPlazas([]);
     } finally {
       setLoadingPlazas(false);
     }
   };
-
-  // ==========================================
-  // LOAD SUBDEPARTMENTS
-  // ==========================================
 
   const loadSubdepartments = async (departmentId) => {
     if (!departmentId) {
@@ -194,44 +143,21 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
         authConfig
       );
 
-      console.log(
-        "Subdepartments for Department:",
-        departmentId,
-        response.data
-      );
-
       setSubdepartments(response.data);
     } catch (error) {
-      console.error(
-        "Error loading subdepartments:",
-        error
-      );
-
+      console.error("Error loading subdepartments:", error);
       setSubdepartments([]);
     } finally {
       setLoadingSubdepartments(false);
     }
   };
 
-  // ==========================================
-  // FIND SELECTED ROLE
-  // ==========================================
-
   const selectedRole = roles.find(
-    (role) =>
-      Number(role.roleId) === Number(formData.roleId)
+    (role) => Number(role.roleId) === Number(formData.roleId)
   );
-
-  // ==========================================
-  // CHECK TMS USER
-  // ==========================================
 
   const isTmsUser =
     selectedRole?.roleName?.toLowerCase() === "tms user";
-
-  // ==========================================
-  // LOAD PLAZAS ONLY FOR TMS USER
-  // ==========================================
 
   useEffect(() => {
     if (isTmsUser) {
@@ -246,16 +172,54 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
     }
   }, [isTmsUser]);
 
-  // ==========================================
-  // HANDLE INPUT CHANGES
-  // ==========================================
+  const sanitizeName = (value) => {
+    return value
+      .replace(/[^A-Za-z\s]/g, "")
+      .replace(/\s+/g, " ")
+      .replace(/^\s+/, "");
+  };
+
+  const sanitizeEmail = (value) => {
+    return value
+      .replace(/\s/g, "")
+      .toLowerCase();
+  };
+
+  const sanitizePhone = (value) => {
+    return value
+      .replace(/\D/g, "")
+      .slice(0, 10);
+  };
+
+  const sanitizePassword = (value) => {
+    return value.replace(/\s/g, "");
+  };
 
   const handleChange = async (e) => {
     const { name, value } = e.target;
 
-    // ========================================
-    // ROLE CHANGED
-    // ========================================
+    let sanitizedValue = value;
+
+    if (name === "firstName" || name === "lastName") {
+      sanitizedValue = sanitizeName(value);
+    }
+
+    if (name === "email") {
+      sanitizedValue = sanitizeEmail(value);
+    }
+
+    if (name === "phoneNumber") {
+      sanitizedValue = sanitizePhone(value);
+    }
+
+    if (name === "password") {
+      sanitizedValue = sanitizePassword(value);
+    }
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
 
     if (name === "roleId") {
       setFormData((prev) => ({
@@ -267,14 +231,16 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
       return;
     }
 
-    // ========================================
-    // DEPARTMENT CHANGED
-    // ========================================
-
     if (name === "departmentId") {
       setFormData((prev) => ({
         ...prev,
         departmentId: value,
+        subdepartmentId: "",
+      }));
+
+      setErrors((prev) => ({
+        ...prev,
+        departmentId: "",
         subdepartmentId: "",
       }));
 
@@ -285,149 +251,148 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
       }
 
       await loadSubdepartments(value);
-
       return;
     }
 
-    // ========================================
-    // OTHER FIELDS
-    // ========================================
-
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: sanitizedValue,
     }));
   };
 
-  // ==========================================
-  // SUBMIT
-  // ==========================================
+  const validateForm = () => {
+    const newErrors = {};
+
+    const firstName = formData.firstName.trim();
+    const lastName = formData.lastName.trim();
+    const email = formData.email.trim();
+    const phoneNumber = formData.phoneNumber.trim();
+    const password = formData.password;
+
+    if (!firstName) {
+      newErrors.firstName = "First name is required.";
+    } else if (firstName.length < 2) {
+      newErrors.firstName = "First name must contain at least 2 characters.";
+    } else if (firstName.length > 50) {
+      newErrors.firstName = "First name cannot exceed 50 characters.";
+    } else if (!/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(firstName)) {
+      newErrors.firstName =
+        "First name should contain only letters and single spaces.";
+    }
+
+    if (!lastName) {
+      newErrors.lastName = "Last name is required.";
+    } else if (lastName.length < 2) {
+      newErrors.lastName = "Last name must contain at least 2 characters.";
+    } else if (lastName.length > 50) {
+      newErrors.lastName = "Last name cannot exceed 50 characters.";
+    } else if (!/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(lastName)) {
+      newErrors.lastName =
+        "Last name should contain only letters and single spaces.";
+    }
+
+    if (!email) {
+      newErrors.email = "Email is required.";
+    } else if (email.length > 100) {
+      newErrors.email = "Email cannot exceed 100 characters.";
+    } else if (
+      !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email)
+    ) {
+      newErrors.email = "Please enter a valid email address.";
+    }
+
+    if (!phoneNumber) {
+      newErrors.phoneNumber = "Phone number is required.";
+    } else if (!/^[6-9]\d{9}$/.test(phoneNumber)) {
+      newErrors.phoneNumber =
+        "Phone number must be a valid 10-digit Indian mobile number.";
+    }
+
+    if (!isEditMode) {
+      if (!password) {
+        newErrors.password = "Password is required.";
+      } else if (password.length < 8) {
+        newErrors.password =
+          "Password must contain at least 8 characters.";
+      } else if (password.length > 100) {
+        newErrors.password =
+          "Password cannot exceed 100 characters.";
+      } else if (!/[A-Z]/.test(password)) {
+        newErrors.password =
+          "Password must contain at least one uppercase letter.";
+      } else if (!/[a-z]/.test(password)) {
+        newErrors.password =
+          "Password must contain at least one lowercase letter.";
+      } else if (!/[0-9]/.test(password)) {
+        newErrors.password =
+          "Password must contain at least one number.";
+      }
+    }
+
+    if (!formData.roleId) {
+      newErrors.roleId = "Please select a role.";
+    }
+
+    if (!formData.departmentId) {
+      newErrors.departmentId = "Please select a department.";
+    }
+
+    if (!formData.subdepartmentId) {
+      newErrors.subdepartmentId = "Please select a subdepartment.";
+    }
+
+    if (isTmsUser && !formData.plazaId) {
+      newErrors.plazaId = "Please select a plaza.";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // ========================================
-    // VALIDATE ROLE
-    // ========================================
-
-    if (!formData.roleId) {
-      alert("Please select a role.");
-      return;
-    }
-
-    // ========================================
-    // VALIDATE DEPARTMENT
-    // ========================================
-
-    if (!formData.departmentId) {
-      alert("Please select a department.");
-      return;
-    }
-
-    // ========================================
-    // VALIDATE SUBDEPARTMENT
-    // ========================================
-
-    if (!formData.subdepartmentId) {
-      alert("Please select a subdepartment.");
-      return;
-    }
-
-    // ========================================
-    // VALIDATE PLAZA ONLY FOR TMS USER
-    // ========================================
-
-    if (isTmsUser && !formData.plazaId) {
-      alert("Please select a plaza.");
-      return;
-    }
-
-    // ========================================
-    // PASSWORD REQUIRED ONLY FOR CREATE
-    // ========================================
-
-    if (!isEditMode && !formData.password.trim()) {
-      alert("Please enter a password.");
+    if (!validateForm()) {
       return;
     }
 
     setLoading(true);
 
     try {
-      // ======================================
-      // BASE PAYLOAD
-      // ======================================
-
-      const payload = {
-        firstName: formData.firstName.trim(),
-        lastName: formData.lastName.trim(),
-        email: formData.email.trim(),
-        phoneNumber: formData.phoneNumber.trim(),
-
+      const basePayload = {
+        firstName: sanitizeName(formData.firstName).trim(),
+        lastName: sanitizeName(formData.lastName).trim(),
+        email: sanitizeEmail(formData.email).trim(),
+        phoneNumber: sanitizePhone(formData.phoneNumber).trim(),
         roleId: Number(formData.roleId),
-
         departmentId: Number(formData.departmentId),
-
-        subdepartmentId: Number(
-          formData.subdepartmentId
-        ),
-
-        // Plaza only belongs to TMS User
-        plazaId: isTmsUser
-          ? Number(formData.plazaId)
-          : null,
+        subdepartmentId: Number(formData.subdepartmentId),
+        plazaId: isTmsUser ? Number(formData.plazaId) : null,
       };
 
-      // ======================================
-      // PASSWORD
-      // ======================================
-
       if (!isEditMode) {
-        payload.password = formData.password;
-      } else if (formData.password.trim() !== "") {
-        payload.password = formData.password;
-      }
+        const createPayload = {
+          ...basePayload,
+          password: sanitizePassword(formData.password),
+        };
 
-      console.log(
-        isEditMode
-          ? "UPDATE USER PAYLOAD:"
-          : "CREATE USER PAYLOAD:",
-        payload
-      );
-
-      // ======================================
-      // CREATE USER
-      // POST
-      // ======================================
-
-      if (!isEditMode) {
         await axios.post(
           "http://localhost:5163/api/User",
-          payload,
+          createPayload,
           authConfig
         );
 
         alert("User created successfully.");
-      }
-
-      // ======================================
-      // UPDATE USER
-      // PUT
-      // ======================================
-
-      else {
+      } else {
         await axios.put(
           `http://localhost:5163/api/User/${editingUser.userId}`,
-          payload,
+          basePayload,
           authConfig
         );
 
         alert("User updated successfully.");
       }
-
-      // ======================================
-      // SUCCESS
-      // ======================================
 
       if (onSuccess) {
         onSuccess();
@@ -440,99 +405,53 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
         error
       );
 
-      console.error(
-        "Backend response:",
-        error.response?.data
-      );
+      console.error("Backend response:", error.response?.data);
 
-      const message =
-        error.response?.data?.message ||
-        error.response?.data?.detail ||
-        (isEditMode
-          ? "Failed to update user."
-          : "Failed to create user.");
+      const backendErrors = error.response?.data?.errors;
 
-      alert(message);
+      if (backendErrors) {
+        const validationMessages = Object.values(backendErrors)
+          .flat()
+          .join("\n");
+
+        alert(validationMessages);
+      } else {
+        const message =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          error.response?.data?.title ||
+          (isEditMode
+            ? "Failed to update user."
+            : "Failed to create user.");
+
+        alert(message);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // ==========================================
-  // RETURN UI
-  // ==========================================
-
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div
-        className="
-          bg-white
-          rounded-lg
-          shadow-xl
-          w-full
-          max-w-2xl
-          max-h-[90vh]
-          overflow-y-auto
-        "
-      >
-        {/* ======================================
-            HEADER
-        ====================================== */}
-
-        <div
-          className="
-            flex
-            justify-between
-            items-center
-            px-6
-            py-4
-            border-b
-          "
-        >
-          <h2
-            className="
-              text-xl
-              font-semibold
-              text-[#123A63]
-            "
-          >
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center px-6 py-4 border-b">
+          <h2 className="text-xl font-semibold text-[#123A63]">
             {isEditMode ? "Edit User" : "Create User"}
           </h2>
 
           <button
             type="button"
             onClick={onCancel}
-            className="
-              text-gray-500
-              hover:text-gray-700
-              text-xl
-            "
+            className="text-gray-500 hover:text-gray-700 text-xl"
           >
             ✕
           </button>
         </div>
 
-        {/* ======================================
-            FORM
-        ====================================== */}
-
-        <form
-          onSubmit={handleSubmit}
-          className="p-6"
-        >
+        <form onSubmit={handleSubmit} className="p-6">
           <div className="grid grid-cols-2 gap-4">
-
-            {/* FIRST NAME */}
-
             <div>
-              <label
-                className="
-                  block
-                  text-sm
-                  font-medium
-                  mb-1
-                "
-              >
+              <label className="block text-sm font-medium mb-1">
                 First Name
               </label>
 
@@ -541,28 +460,23 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
-                required
-                className="
-                  w-full
-                  border
-                  rounded-md
-                  px-3
-                  py-2
-                "
+                maxLength={50}
+                className={`w-full border rounded-md px-3 py-2 ${
+                  errors.firstName
+                    ? "border-red-500"
+                    : "border-gray-300"
+                }`}
               />
+
+              {errors.firstName && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.firstName}
+                </p>
+              )}
             </div>
 
-            {/* LAST NAME */}
-
             <div>
-              <label
-                className="
-                  block
-                  text-sm
-                  font-medium
-                  mb-1
-                "
-              >
+              <label className="block text-sm font-medium mb-1">
                 Last Name
               </label>
 
@@ -571,28 +485,23 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
-                required
-                className="
-                  w-full
-                  border
-                  rounded-md
-                  px-3
-                  py-2
-                "
+                maxLength={50}
+                className={`w-full border rounded-md px-3 py-2 ${
+                  errors.lastName
+                    ? "border-red-500"
+                    : "border-gray-300"
+                }`}
               />
+
+              {errors.lastName && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.lastName}
+                </p>
+              )}
             </div>
 
-            {/* EMAIL */}
-
             <div>
-              <label
-                className="
-                  block
-                  text-sm
-                  font-medium
-                  mb-1
-                "
-              >
+              <label className="block text-sm font-medium mb-1">
                 Email
               </label>
 
@@ -601,28 +510,23 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                required
-                className="
-                  w-full
-                  border
-                  rounded-md
-                  px-3
-                  py-2
-                "
+                maxLength={100}
+                className={`w-full border rounded-md px-3 py-2 ${
+                  errors.email
+                    ? "border-red-500"
+                    : "border-gray-300"
+                }`}
               />
+
+              {errors.email && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.email}
+                </p>
+              )}
             </div>
 
-            {/* PHONE */}
-
             <div>
-              <label
-                className="
-                  block
-                  text-sm
-                  font-medium
-                  mb-1
-                "
-              >
+              <label className="block text-sm font-medium mb-1">
                 Phone Number
               </label>
 
@@ -631,75 +535,52 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
                 name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={handleChange}
-                required
-                className="
-                  w-full
-                  border
-                  rounded-md
-                  px-3
-                  py-2
-                "
+                inputMode="numeric"
+                maxLength={10}
+                className={`w-full border rounded-md px-3 py-2 ${
+                  errors.phoneNumber
+                    ? "border-red-500"
+                    : "border-gray-300"
+                }`}
               />
+
+              {errors.phoneNumber && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.phoneNumber}
+                </p>
+              )}
             </div>
 
-            {/* PASSWORD */}
+            {!isEditMode && (
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Password
+                </label>
 
-            <div>
-              <label
-                className="
-                  block
-                  text-sm
-                  font-medium
-                  mb-1
-                "
-              >
-                Password
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  maxLength={100}
+                  placeholder="Enter password"
+                  className={`w-full border rounded-md px-3 py-2 ${
+                    errors.password
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                />
 
-                {isEditMode && (
-                  <span
-                    className="
-                      text-xs
-                      text-gray-500
-                      ml-2
-                    "
-                  >
-                    (Leave blank to keep current)
-                  </span>
+                {errors.password && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.password}
+                  </p>
                 )}
-              </label>
-
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required={!isEditMode}
-                placeholder={
-                  isEditMode
-                    ? "Enter new password only if changing"
-                    : "Enter password"
-                }
-                className="
-                  w-full
-                  border
-                  rounded-md
-                  px-3
-                  py-2
-                "
-              />
-            </div>
-
-            {/* ROLE */}
+              </div>
+            )}
 
             <div>
-              <label
-                className="
-                  block
-                  text-sm
-                  font-medium
-                  mb-1
-                "
-              >
+              <label className="block text-sm font-medium mb-1">
                 Role
               </label>
 
@@ -707,18 +588,13 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
                 name="roleId"
                 value={formData.roleId}
                 onChange={handleChange}
-                required
-                className="
-                  w-full
-                  border
-                  rounded-md
-                  px-3
-                  py-2
-                "
+                className={`w-full border rounded-md px-3 py-2 ${
+                  errors.roleId
+                    ? "border-red-500"
+                    : "border-gray-300"
+                }`}
               >
-                <option value="">
-                  Select Role
-                </option>
+                <option value="">Select Role</option>
 
                 {roles.map((role) => (
                   <option
@@ -729,19 +605,16 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
                   </option>
                 ))}
               </select>
+
+              {errors.roleId && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.roleId}
+                </p>
+              )}
             </div>
 
-            {/* DEPARTMENT */}
-
             <div>
-              <label
-                className="
-                  block
-                  text-sm
-                  font-medium
-                  mb-1
-                "
-              >
+              <label className="block text-sm font-medium mb-1">
                 Department
               </label>
 
@@ -749,18 +622,13 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
                 name="departmentId"
                 value={formData.departmentId}
                 onChange={handleChange}
-                required
-                className="
-                  w-full
-                  border
-                  rounded-md
-                  px-3
-                  py-2
-                "
+                className={`w-full border rounded-md px-3 py-2 ${
+                  errors.departmentId
+                    ? "border-red-500"
+                    : "border-gray-300"
+                }`}
               >
-                <option value="">
-                  Select Department
-                </option>
+                <option value="">Select Department</option>
 
                 {departments.map((department) => (
                   <option
@@ -771,19 +639,16 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
                   </option>
                 ))}
               </select>
+
+              {errors.departmentId && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.departmentId}
+                </p>
+              )}
             </div>
 
-            {/* SUBDEPARTMENT */}
-
             <div>
-              <label
-                className="
-                  block
-                  text-sm
-                  font-medium
-                  mb-1
-                "
-              >
+              <label className="block text-sm font-medium mb-1">
                 Subdepartment
               </label>
 
@@ -791,19 +656,15 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
                 name="subdepartmentId"
                 value={formData.subdepartmentId}
                 onChange={handleChange}
-                required
                 disabled={
                   !formData.departmentId ||
                   loadingSubdepartments
                 }
-                className="
-                  w-full
-                  border
-                  rounded-md
-                  px-3
-                  py-2
-                  disabled:bg-gray-100
-                "
+                className={`w-full border rounded-md px-3 py-2 disabled:bg-gray-100 ${
+                  errors.subdepartmentId
+                    ? "border-red-500"
+                    : "border-gray-300"
+                }`}
               >
                 <option value="">
                   {!formData.departmentId
@@ -815,37 +676,26 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
                     : "Select Subdepartment"}
                 </option>
 
-                {subdepartments.map(
-                  (subdepartment) => (
-                    <option
-                      key={
-                        subdepartment.subdepartmentId
-                      }
-                      value={
-                        subdepartment.subdepartmentId
-                      }
-                    >
-                      {
-                        subdepartment.subdepartmentName
-                      }
-                    </option>
-                  )
-                )}
+                {subdepartments.map((subdepartment) => (
+                  <option
+                    key={subdepartment.subdepartmentId}
+                    value={subdepartment.subdepartmentId}
+                  >
+                    {subdepartment.subdepartmentName}
+                  </option>
+                ))}
               </select>
-            </div>
 
-            {/* PLAZA - ONLY TMS USER */}
+              {errors.subdepartmentId && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.subdepartmentId}
+                </p>
+              )}
+            </div>
 
             {isTmsUser && (
               <div>
-                <label
-                  className="
-                    block
-                    text-sm
-                    font-medium
-                    mb-1
-                  "
-                >
+                <label className="block text-sm font-medium mb-1">
                   Plaza
                 </label>
 
@@ -853,16 +703,12 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
                   name="plazaId"
                   value={formData.plazaId}
                   onChange={handleChange}
-                  required
                   disabled={loadingPlazas}
-                  className="
-                    w-full
-                    border
-                    rounded-md
-                    px-3
-                    py-2
-                    disabled:bg-gray-100
-                  "
+                  className={`w-full border rounded-md px-3 py-2 disabled:bg-gray-100 ${
+                    errors.plazaId
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
                 >
                   <option value="">
                     {loadingPlazas
@@ -881,31 +727,21 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
                     </option>
                   ))}
                 </select>
+
+                {errors.plazaId && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.plazaId}
+                  </p>
+                )}
               </div>
             )}
           </div>
 
-          {/* ======================================
-              BUTTONS
-          ====================================== */}
-
-          <div
-            className="
-              flex
-              justify-end
-              gap-3
-              mt-6
-            "
-          >
+          <div className="flex justify-end gap-3 mt-6">
             <button
               type="button"
               onClick={onCancel}
-              className="
-                px-4
-                py-2
-                border
-                rounded-md
-              "
+              className="px-4 py-2 border rounded-md"
             >
               Cancel
             </button>
@@ -913,15 +749,7 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
             <button
               type="submit"
               disabled={loading}
-              className="
-                px-4
-                py-2
-                bg-[#123A63]
-                text-white
-                rounded-md
-                hover:bg-[#1D4F85]
-                disabled:opacity-50
-              "
+              className="px-4 py-2 bg-[#123A63] text-white rounded-md hover:bg-[#1D4F85] disabled:opacity-50"
             >
               {loading
                 ? isEditMode

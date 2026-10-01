@@ -58,6 +58,11 @@ const sidebarConfig = {
         },
       ],
     },
+    {
+       menuId: 4,
+      name: "Plaza Management",
+      route: "/plazas",
+    }
   ],
 WebAdmin: [
     {

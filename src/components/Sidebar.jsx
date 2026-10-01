@@ -7,12 +7,10 @@ const Sidebar = ({ isOpen, onToggle, menus = [] }) => {
 
   const [openMenus, setOpenMenus] = useState({});
 
-  //Logout and navigating to the Login page 
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/");
   };
-  // it changes the state of the menu clicked 
   const toggleMenu = (menuId) => {
     setOpenMenus((previous) => ({
       ...previous,
