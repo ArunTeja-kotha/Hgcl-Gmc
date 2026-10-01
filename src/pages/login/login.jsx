@@ -11,9 +11,9 @@ const Login = () => {
   const [password, setPassword] = useState("");
 
   // ============================================
-  // Get Role / Account Type from JWT Token
+  // Get Role / Name / Account Type from JWT Token
   // ============================================
-  const getRoleFromToken = (token) => {
+  const getTokenData = (token) => {
     try {
       const payload = token.split(".")[1];
 
@@ -24,7 +24,7 @@ const Login = () => {
       console.log("JWT Payload:", decodedPayload);
 
       // --------------------------------------------
-      // 1. Check normal role claim
+      // Get Role
       // --------------------------------------------
       const role =
         decodedPayload.role ||
@@ -32,22 +32,34 @@ const Login = () => {
           "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
         ];
 
-      if (role) {
-        return role;
-      }
+      // --------------------------------------------
+      // Get User Name
+      // --------------------------------------------
+      const userName =
+        decodedPayload[
+          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+        ] || decodedPayload.name;
 
       // --------------------------------------------
-      // 2. Citizen JWT does not have Role claim
-      //    So check AccountType
+      // Citizen JWT does not have Role claim
       // --------------------------------------------
-      if (decodedPayload.AccountType === "Citizen") {
-        return "Citizen";
-      }
+      const finalRole =
+        role ||
+        (decodedPayload.AccountType === "Citizen"
+          ? "Citizen"
+          : null);
 
-      return null;
+      return {
+        role: finalRole,
+        userName: userName || null,
+      };
     } catch (error) {
       console.error("Unable to decode JWT:", error);
-      return null;
+
+      return {
+        role: null,
+        userName: null,
+      };
     }
   };
 
@@ -77,11 +89,12 @@ const Login = () => {
       localStorage.setItem("token", token);
 
       // ============================================
-      // Get Role / Account Type from JWT
+      // Get Role and Name from JWT
       // ============================================
-      const role = getRoleFromToken(token);
+      const { role, userName } = getTokenData(token);
 
       console.log("Logged in role:", role);
+      console.log("Logged in user name:", userName);
 
       // ============================================
       // Store Role
@@ -94,9 +107,33 @@ const Login = () => {
       }
 
       // ============================================
-      // Navigate to Dashboard
+      // Store User Name
       // ============================================
-      navigate("/dashboard");
+      if (userName) {
+        localStorage.setItem("userName", userName);
+      } else {
+        localStorage.removeItem("userName");
+        console.warn("No user name found in JWT.");
+      }
+
+      // ============================================
+      // Navigate based on Role
+      // ============================================
+      if (role === "Super Administrator") {
+        navigate("/users");
+      } else if (role === "Web Administrator") {
+        navigate("/users");
+      } else if (role === "TMS User") {
+        navigate("/tms/grievances");
+      } else if (role === "Web User") {
+        navigate("/webuser/grievances");
+      } else if (role === "Nodal Officer") {
+        navigate("/nodal/grievances");
+      } else if (role === "Citizen") {
+        navigate("/citizen/grievances/my");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (error) {
       console.error("Login failed:", error);
 
@@ -146,8 +183,6 @@ const Login = () => {
           shadow-xl
         "
       >
-        {/* ================= Header ================= */}
-
         <div className="text-center mb-7">
           <h1 className="text-2xl font-bold text-blue-950">
             Grievance Management System
@@ -158,14 +193,10 @@ const Login = () => {
           </p>
         </div>
 
-        {/* ================= Login Form ================= */}
-
         <form
           className="space-y-5"
           onSubmit={handleLogin}
         >
-          {/* ================= Email ================= */}
-
           <div>
             <label
               htmlFor="email"
@@ -202,8 +233,6 @@ const Login = () => {
               "
             />
           </div>
-
-          {/* ================= Password ================= */}
 
           <div>
             <label
@@ -265,8 +294,6 @@ const Login = () => {
             </div>
           </div>
 
-          {/* ================= Login Button ================= */}
-
           <button
             type="submit"
             className="
@@ -287,8 +314,6 @@ const Login = () => {
             Log In
           </button>
         </form>
-
-        {/* ================= Register ================= */}
 
         <div className="mt-6 text-center">
           <p className="text-center text-sm text-[#64748B] px-6">

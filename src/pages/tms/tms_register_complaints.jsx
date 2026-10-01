@@ -7,19 +7,11 @@ import Toast from "../../components/toast";
 
 const TmsRegisterComplaints = () => {
   const navigate = useNavigate();
-
   const [subCategories, setSubCategories] = useState([]);
   const [plazas, setPlazas] = useState([]);
-
-  const [loadingSubCategories, setLoadingSubCategories] =
-    useState(false);
-
-  const [loadingPlazas, setLoadingPlazas] =
-    useState(false);
-
-  const [registerLoading, setRegisterLoading] =
-    useState(false);
-
+  const [loadingSubCategories, setLoadingSubCategories] = useState(false);
+  const [loadingPlazas, setLoadingPlazas] = useState(false);
+  const [registerLoading, setRegisterLoading] = useState(false);
   const [toast, setToast] = useState({
     message: "",
     type: "success",
