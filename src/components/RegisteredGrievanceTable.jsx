@@ -25,7 +25,7 @@ const RegisteredGrievancesTable = ({ grievances }) => {
 
       <div className="overflow-x-auto">
 
-        <table className="w-full min-w-[1200px]">
+        <table className="w-full min-w-300">
 
           <thead className="bg-[#E8F2FB]">
 
@@ -84,7 +84,7 @@ const RegisteredGrievancesTable = ({ grievances }) => {
                 </td>
 
                 {/* Description */}
-                <td className="max-w-[350px] px-4 py-3 text-sm text-[#1F2937]">
+                <td className="max-w-87.5 px-4 py-3 text-sm text-[#1F2937]">
                   {grievance.description || "-"}
                 </td>
 
