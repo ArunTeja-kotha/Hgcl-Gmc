@@ -9,6 +9,8 @@ import SubDepartments from "../pages/SubDepartments";
 import GrievanceCategories from "../pages/GrievanceCategory";
 import Departments from "../pages/Departments";
 import Layout from "../components/Layout";
+import TmsRegisterComplaints from "../pages/tms/tms_register_complaints";
+
 import Dashboard from "../pages/dashboard/dashboard";
 import TmsComplaints from "../pages/tms/tms_complaints";
 import GrievanceSubCategory from "../pages/GrievanceSubCategory";
@@ -44,78 +46,15 @@ const AppRoutes = () => {
           </Layout>
         }
       />
-
       <Route
-        path="/users"
-        element={
-          <Layout>
-            <Users />
-          </Layout>
-        }
-      />
-
-      <Route
-        path="/plazas"
-        element={
-          <Layout>
-            <Plazas />
-          </Layout>
-        }
-      />
-
-      <Route
-        path="/roles"
-        element={
-          <Layout>
-            <Roles />
-          </Layout>
-        }
-      />
-
-      <Route
-        path="/departments"
-        element={
-          <Layout>
-            <Departments />
-          </Layout>
-        }
-      />
-
-      <Route
-        path="/sub-departments"
-        element={
-          <Layout>
-            <SubDepartments />
-          </Layout>
-        }
-      />
-
-      <Route
-        path="/categories"
-        element={
-          <Layout>
-            <GrievanceCategories />
-          </Layout>
-        }
-      />
-
-      <Route
-  path="/sub-categories"
+  path="/tms/grievances/new"
   element={
     <Layout>
-      <GrievanceSubCategory />
+      <TmsRegisterComplaints />
     </Layout>
   }
 />
 
-  <Route
-  path="/grievances"
-  element={
-    <Layout>
-      <RegisteredGrievances />
-    </Layout>
-  }
-/>
     </Routes>
   );
 };

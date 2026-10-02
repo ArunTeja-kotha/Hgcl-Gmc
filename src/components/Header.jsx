@@ -2,6 +2,8 @@ import React from "react";
 import logo from "../assets/logo.png";
 
 const Header = () => {
+  const userName = localStorage.getItem("userName") || "User";
+
   return (
     <header className="h-20 w-full bg-white border-b border-[#D5E0EA] flex items-center justify-between px-6 shadow-sm">
 
@@ -18,18 +20,11 @@ const Header = () => {
         </h1>
 
       </div>
-      <div className="flex items-center gap-3">
 
-        <div className="h-9 w-9 rounded-full bg-[#E8F2FB] flex items-center justify-center text-[#123A63] font-semibold">
-          U
-        </div>
+      <div className="flex items-center">
 
-        <span className="text-[#1F2937] font-medium">
-          Username
-        </span>
-
-        <span className="text-[#64748B] text-sm">
-          ▼
+        <span className="text-[#1F2937] font-medium text-sm">
+          {userName}
         </span>
 
       </div>

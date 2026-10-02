@@ -11,9 +11,9 @@ const Login = () => {
   const [password, setPassword] = useState("");
 
   // ============================================
-  // Get Role / Account Type from JWT Token
+  // Get Role / Name / Account Type from JWT Token
   // ============================================
-  const getRoleFromToken = (token) => {
+  const getTokenData = (token) => {
     try {
       const payload = token.split(".")[1];
 
@@ -24,7 +24,7 @@ const Login = () => {
       console.log("JWT Payload:", decodedPayload);
 
       // --------------------------------------------
-      // 1. Check normal role claim
+      // Get Role
       // --------------------------------------------
       const role =
         decodedPayload.role ||
@@ -32,22 +32,34 @@ const Login = () => {
           "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
         ];
 
-      if (role) {
-        return role;
-      }
+      // --------------------------------------------
+      // Get User Name
+      // --------------------------------------------
+      const userName =
+        decodedPayload[
+          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+        ] || decodedPayload.name;
 
       // --------------------------------------------
-      // 2. Citizen JWT does not have Role claim
-      //    So check AccountType
+      // Citizen JWT does not have Role claim
       // --------------------------------------------
-      if (decodedPayload.AccountType === "Citizen") {
-        return "Citizen";
-      }
+      const finalRole =
+        role ||
+        (decodedPayload.AccountType === "Citizen"
+          ? "Citizen"
+          : null);
 
-      return null;
+      return {
+        role: finalRole,
+        userName: userName || null,
+      };
     } catch (error) {
       console.error("Unable to decode JWT:", error);
-      return null;
+
+      return {
+        role: null,
+        userName: null,
+      };
     }
   };
   const handleLogin = async (e) => {
@@ -65,10 +77,18 @@ const Login = () => {
       console.log("Login successful:", response.data);
       const token = response.data.token;
       localStorage.setItem("token", token);
-      const role = getRoleFromToken(token);
+
+      // ============================================
+      // Get Role and Name from JWT
+      // ============================================
+      const { role, userName } = getTokenData(token);
+
       console.log("Logged in role:", role);
+      console.log("Logged in user name:", userName);
 
-
+      // ============================================
+      // Store Role
+      // ============================================
       if (role) {
         localStorage.setItem("role", role);
       } else {
@@ -76,7 +96,34 @@ const Login = () => {
         console.warn("No role or account type found in JWT.");
       }
 
-      navigate("/dashboard");
+      // ============================================
+      // Store User Name
+      // ============================================
+      if (userName) {
+        localStorage.setItem("userName", userName);
+      } else {
+        localStorage.removeItem("userName");
+        console.warn("No user name found in JWT.");
+      }
+
+      // ============================================
+      // Navigate based on Role
+      // ============================================
+      if (role === "Super Administrator") {
+        navigate("/users");
+      } else if (role === "Web Administrator") {
+        navigate("/users");
+      } else if (role === "TMS User") {
+        navigate("/tms/grievances");
+      } else if (role === "Web User") {
+        navigate("/webuser/grievances");
+      } else if (role === "Nodal Officer") {
+        navigate("/nodal/grievances");
+      } else if (role === "Citizen") {
+        navigate("/citizen/grievances/my");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (error) {
       console.error("Login failed:", error);
 
@@ -135,6 +182,7 @@ const Login = () => {
             Hyderabad Growth Corridor Limited
           </p>
         </div>
+
         <form
           className="space-y-5"
           onSubmit={handleLogin}
@@ -175,6 +223,7 @@ const Login = () => {
               "
             />
           </div>
+
           <div>
             <label
               htmlFor="password"
@@ -255,6 +304,7 @@ const Login = () => {
             Log In
           </button>
         </form>
+
         <div className="mt-6 text-center">
           <p className="text-center text-sm text-[#64748B] px-6">
             Don't have an account?{" "}
