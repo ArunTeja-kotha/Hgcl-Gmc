@@ -1,4 +1,7 @@
 const sidebarConfig = {
+  // =========================================================
+  // SUPER ADMINISTRATOR
+  // =========================================================
   SuperAdmin: [
     {
       menuId: 1,
@@ -58,13 +61,18 @@ const sidebarConfig = {
         },
       ],
     },
+
     {
-       menuId: 4,
+      menuId: 4,
       name: "Plaza Management",
       route: "/plazas",
-    }
+    },
   ],
-WebAdmin: [
+
+  // =========================================================
+  // WEB ADMINISTRATOR
+  // =========================================================
+  WebAdmin: [
     {
       menuId: 1,
       name: "User Management",
@@ -75,32 +83,36 @@ WebAdmin: [
           name: "Users",
           route: "/users",
         },
-        {
-          menuId: 12,
-          name: "Create User",
-          route: "/users/create",
-        },
       ],
     },
 
     {
       menuId: 3,
       name: "Grievances",
-      route: "/grievances",
+      route: "/webadmin/grievances",
       children: [
         {
           menuId: 31,
           name: "All Grievances",
-          route: "/grievances",
+          route: "/webadmin/grievances",
         },
         {
           menuId: 32,
-          name: "Assign Grievances",
-          route: "/grievances/assign",
+          name: "Pending Grievances",
+          route: "/webadmin/grievances/pending",
+        },
+        {
+          menuId: 33,
+          name: "Completed Grievances",
+          route: "/webadmin/grievances/completed",
         },
       ],
     },
   ],
+
+  // =========================================================
+  // TMS USER
+  // =========================================================
   TMSUser: [
     {
       menuId: 2,
@@ -120,41 +132,28 @@ WebAdmin: [
       ],
     },
   ],
+
+  // =========================================================
+  // WEB USER
+  // =========================================================
   WebUser: [
     {
-      menuId: 3,
+      menuId: 4,
       name: "Grievances",
       route: "/webuser/grievances",
       children: [
         {
-          menuId: 31,
+          menuId: 41,
           name: "All Grievances",
           route: "/webuser/grievances",
-        },
-        {
-          menuId: 32,
-          name: "New Grievances",
-          route: "/webuser/grievances/new",
-        },
-        {
-          menuId: 33,
-          name: "My Grievances",
-          route: "/webuser/grievances/my",
-        },
-        {
-          menuId: 34,
-          name: "Pending Grievances",
-          route: "/webuser/grievances/pending",
-        },
-        {
-          menuId: 35,
-          name: "Completed Grievances",
-          route: "/webuser/grievances/completed",
         },
       ],
     },
   ],
 
+  // =========================================================
+  // NODAL OFFICER
+  // =========================================================
   NodalOfficer: [
     {
       menuId: 3,
@@ -176,30 +175,42 @@ WebAdmin: [
           name: "Pending Grievances",
           route: "/nodal/grievances/pending",
         },
+      
         {
           menuId: 34,
-          name: "Assigned Grievances",
-          route: "/nodal/grievances/assigned",
-        },
-        {
-          menuId: 35,
-          name: "Completed Grievances",
-          route: "/nodal/grievances/completed",
-        },
-        {
-          menuId: 36,
           name: "Reassigned Grievances",
           route: "/nodal/grievances/reassigned",
-        },
-        {
-          menuId: 37,
-          name: "Escalated Grievances",
-          route: "/nodal/grievances/escalated",
         },
       ],
     },
   ],
 
+  // =========================================================
+  // FIELD USER
+  // =========================================================
+  FieldUser: [
+    {
+      menuId: 4,
+      name: "Grievances",
+      route: "/field/grievances",
+      children: [
+        {
+          menuId: 41,
+          name: "Assigned Grievances",
+          route: "/field/grievances/assigned",
+        },
+        {
+          menuId: 42,
+          name: "Completed Grievances",
+          route: "/field/grievances/completed",
+        },
+      ],
+    },
+  ],
+
+  // =========================================================
+  // CITIZEN
+  // =========================================================
   Citizen: [
     {
       menuId: 3,

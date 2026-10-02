@@ -6,9 +6,11 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
   const [departments, setDepartments] = useState([]);
   const [subdepartments, setSubdepartments] = useState([]);
   const [plazas, setPlazas] = useState([]);
+
   const [loading, setLoading] = useState(false);
   const [loadingSubdepartments, setLoadingSubdepartments] = useState(false);
   const [loadingPlazas, setLoadingPlazas] = useState(false);
+
   const [errors, setErrors] = useState({});
 
   const emptyForm = {
@@ -35,10 +37,18 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
 
   const isEditMode = Boolean(editingUser);
 
+  // --------------------------------------------------
+  // LOAD ROLES AND DEPARTMENTS
+  // --------------------------------------------------
+
   useEffect(() => {
     loadRoles();
     loadDepartments();
   }, []);
+
+  // --------------------------------------------------
+  // LOAD EDITING USER DATA
+  // --------------------------------------------------
 
   useEffect(() => {
     if (!editingUser) {
@@ -86,6 +96,10 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
     }
   }, [editingUser]);
 
+  // --------------------------------------------------
+  // LOAD ROLES
+  // --------------------------------------------------
+
   const loadRoles = async () => {
     try {
       const response = await axios.get(
@@ -99,6 +113,10 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
     }
   };
 
+  // --------------------------------------------------
+  // LOAD DEPARTMENTS
+  // --------------------------------------------------
+
   const loadDepartments = async () => {
     try {
       const response = await axios.get(
@@ -111,6 +129,10 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
       console.error("Error loading departments:", error);
     }
   };
+
+  // --------------------------------------------------
+  // LOAD PLAZAS
+  // --------------------------------------------------
 
   const loadPlazas = async () => {
     setLoadingPlazas(true);
@@ -128,6 +150,10 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
       setLoadingPlazas(false);
     }
   };
+
+  // --------------------------------------------------
+  // LOAD SUBDEPARTMENTS BASED ON DEPARTMENT
+  // --------------------------------------------------
 
   const loadSubdepartments = async (departmentId) => {
     if (!departmentId) {
@@ -152,12 +178,20 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
     }
   };
 
+  // --------------------------------------------------
+  // SELECTED ROLE
+  // --------------------------------------------------
+
   const selectedRole = roles.find(
     (role) => Number(role.roleId) === Number(formData.roleId)
   );
 
   const isTmsUser =
-    selectedRole?.roleName?.toLowerCase() === "tms user";
+    selectedRole?.roleName?.trim().toLowerCase() === "tms user";
+
+  // --------------------------------------------------
+  // LOAD PLAZAS WHEN TMS USER IS SELECTED
+  // --------------------------------------------------
 
   useEffect(() => {
     if (isTmsUser) {
@@ -172,6 +206,10 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
     }
   }, [isTmsUser]);
 
+  // --------------------------------------------------
+  // SANITIZATION
+  // --------------------------------------------------
+
   const sanitizeName = (value) => {
     return value
       .replace(/[^A-Za-z\s]/g, "")
@@ -180,20 +218,20 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
   };
 
   const sanitizeEmail = (value) => {
-    return value
-      .replace(/\s/g, "")
-      .toLowerCase();
+    return value.replace(/\s/g, "").toLowerCase();
   };
 
   const sanitizePhone = (value) => {
-    return value
-      .replace(/\D/g, "")
-      .slice(0, 10);
+    return value.replace(/\D/g, "").slice(0, 10);
   };
 
   const sanitizePassword = (value) => {
     return value.replace(/\s/g, "");
   };
+
+  // --------------------------------------------------
+  // HANDLE CHANGE
+  // --------------------------------------------------
 
   const handleChange = async (e) => {
     const { name, value } = e.target;
@@ -221,6 +259,10 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
       [name]: "",
     }));
 
+    // ----------------------------------------------
+    // ROLE CHANGE
+    // ----------------------------------------------
+
     if (name === "roleId") {
       setFormData((prev) => ({
         ...prev,
@@ -230,6 +272,10 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
 
       return;
     }
+
+    // ----------------------------------------------
+    // DEPARTMENT CHANGE
+    // ----------------------------------------------
 
     if (name === "departmentId") {
       setFormData((prev) => ({
@@ -251,14 +297,23 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
       }
 
       await loadSubdepartments(value);
+
       return;
     }
+
+    // ----------------------------------------------
+    // NORMAL FIELD
+    // ----------------------------------------------
 
     setFormData((prev) => ({
       ...prev,
       [name]: sanitizedValue,
     }));
   };
+
+  // --------------------------------------------------
+  // VALIDATION
+  // --------------------------------------------------
 
   const validateForm = () => {
     const newErrors = {};
@@ -269,45 +324,57 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
     const phoneNumber = formData.phoneNumber.trim();
     const password = formData.password;
 
+    // First Name
     if (!firstName) {
       newErrors.firstName = "First name is required.";
     } else if (firstName.length < 2) {
-      newErrors.firstName = "First name must contain at least 2 characters.";
+      newErrors.firstName =
+        "First name must contain at least 2 characters.";
     } else if (firstName.length > 50) {
-      newErrors.firstName = "First name cannot exceed 50 characters.";
+      newErrors.firstName =
+        "First name cannot exceed 50 characters.";
     } else if (!/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(firstName)) {
       newErrors.firstName =
         "First name should contain only letters and single spaces.";
     }
 
+    // Last Name
     if (!lastName) {
       newErrors.lastName = "Last name is required.";
     } else if (lastName.length < 2) {
-      newErrors.lastName = "Last name must contain at least 2 characters.";
+      newErrors.lastName =
+        "Last name must contain at least 2 characters.";
     } else if (lastName.length > 50) {
-      newErrors.lastName = "Last name cannot exceed 50 characters.";
+      newErrors.lastName =
+        "Last name cannot exceed 50 characters.";
     } else if (!/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(lastName)) {
       newErrors.lastName =
         "Last name should contain only letters and single spaces.";
     }
 
+    // Email
     if (!email) {
       newErrors.email = "Email is required.";
     } else if (email.length > 100) {
-      newErrors.email = "Email cannot exceed 100 characters.";
+      newErrors.email =
+        "Email cannot exceed 100 characters.";
     } else if (
       !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email)
     ) {
-      newErrors.email = "Please enter a valid email address.";
+      newErrors.email =
+        "Please enter a valid email address.";
     }
 
+    // Phone
     if (!phoneNumber) {
-      newErrors.phoneNumber = "Phone number is required.";
+      newErrors.phoneNumber =
+        "Phone number is required.";
     } else if (!/^[6-9]\d{9}$/.test(phoneNumber)) {
       newErrors.phoneNumber =
         "Phone number must be a valid 10-digit Indian mobile number.";
     }
 
+    // Password - Create only
     if (!isEditMode) {
       if (!password) {
         newErrors.password = "Password is required.";
@@ -329,26 +396,37 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
       }
     }
 
+    // Role
     if (!formData.roleId) {
       newErrors.roleId = "Please select a role.";
     }
 
+    // Department
     if (!formData.departmentId) {
-      newErrors.departmentId = "Please select a department.";
+      newErrors.departmentId =
+        "Please select a department.";
     }
 
+    // Subdepartment
     if (!formData.subdepartmentId) {
-      newErrors.subdepartmentId = "Please select a subdepartment.";
+      newErrors.subdepartmentId =
+        "Please select a subdepartment.";
     }
 
+    // Plaza only for TMS User
     if (isTmsUser && !formData.plazaId) {
-      newErrors.plazaId = "Please select a plaza.";
+      newErrors.plazaId =
+        "Please select a plaza.";
     }
 
     setErrors(newErrors);
 
     return Object.keys(newErrors).length === 0;
   };
+
+  // --------------------------------------------------
+  // SUBMIT
+  // --------------------------------------------------
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -365,16 +443,30 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
         lastName: sanitizeName(formData.lastName).trim(),
         email: sanitizeEmail(formData.email).trim(),
         phoneNumber: sanitizePhone(formData.phoneNumber).trim(),
+
         roleId: Number(formData.roleId),
+
         departmentId: Number(formData.departmentId),
-        subdepartmentId: Number(formData.subdepartmentId),
-        plazaId: isTmsUser ? Number(formData.plazaId) : null,
+
+        subdepartmentId: Number(
+          formData.subdepartmentId
+        ),
+
+        plazaId: isTmsUser
+          ? Number(formData.plazaId)
+          : null,
       };
+
+      // ----------------------------------------------
+      // CREATE
+      // ----------------------------------------------
 
       if (!isEditMode) {
         const createPayload = {
           ...basePayload,
-          password: sanitizePassword(formData.password),
+          password: sanitizePassword(
+            formData.password
+          ),
         };
 
         await axios.post(
@@ -384,7 +476,13 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
         );
 
         alert("User created successfully.");
-      } else {
+      }
+
+      // ----------------------------------------------
+      // UPDATE
+      // ----------------------------------------------
+
+      else {
         await axios.put(
           `http://localhost:5163/api/User/${editingUser.userId}`,
           basePayload,
@@ -405,14 +503,19 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
         error
       );
 
-      console.error("Backend response:", error.response?.data);
+      console.error(
+        "Backend response:",
+        error.response?.data
+      );
 
-      const backendErrors = error.response?.data?.errors;
+      const backendErrors =
+        error.response?.data?.errors;
 
       if (backendErrors) {
-        const validationMessages = Object.values(backendErrors)
-          .flat()
-          .join("\n");
+        const validationMessages =
+          Object.values(backendErrors)
+            .flat()
+            .join("\n");
 
         alert(validationMessages);
       } else {
@@ -431,12 +534,19 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
     }
   };
 
+  // --------------------------------------------------
+  // UI
+  // --------------------------------------------------
+
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+
         <div className="flex justify-between items-center px-6 py-4 border-b">
           <h2 className="text-xl font-semibold text-[#123A63]">
-            {isEditMode ? "Edit User" : "Create User"}
+            {isEditMode
+              ? "Edit User"
+              : "Create User"}
           </h2>
 
           <button
@@ -448,8 +558,13 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6">
+        <form
+          onSubmit={handleSubmit}
+          className="p-6"
+        >
           <div className="grid grid-cols-2 gap-4">
+
+            {/* FIRST NAME */}
             <div>
               <label className="block text-sm font-medium mb-1">
                 First Name
@@ -475,6 +590,7 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
               )}
             </div>
 
+            {/* LAST NAME */}
             <div>
               <label className="block text-sm font-medium mb-1">
                 Last Name
@@ -500,6 +616,7 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
               )}
             </div>
 
+            {/* EMAIL */}
             <div>
               <label className="block text-sm font-medium mb-1">
                 Email
@@ -525,6 +642,7 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
               )}
             </div>
 
+            {/* PHONE */}
             <div>
               <label className="block text-sm font-medium mb-1">
                 Phone Number
@@ -551,6 +669,7 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
               )}
             </div>
 
+            {/* PASSWORD */}
             {!isEditMode && (
               <div>
                 <label className="block text-sm font-medium mb-1">
@@ -579,6 +698,7 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
               </div>
             )}
 
+            {/* ROLE */}
             <div>
               <label className="block text-sm font-medium mb-1">
                 Role
@@ -594,7 +714,9 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
                     : "border-gray-300"
                 }`}
               >
-                <option value="">Select Role</option>
+                <option value="">
+                  Select Role
+                </option>
 
                 {roles.map((role) => (
                   <option
@@ -613,6 +735,7 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
               )}
             </div>
 
+            {/* DEPARTMENT */}
             <div>
               <label className="block text-sm font-medium mb-1">
                 Department
@@ -628,7 +751,9 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
                     : "border-gray-300"
                 }`}
               >
-                <option value="">Select Department</option>
+                <option value="">
+                  Select Department
+                </option>
 
                 {departments.map((department) => (
                   <option
@@ -647,6 +772,7 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
               )}
             </div>
 
+            {/* SUBDEPARTMENT */}
             <div>
               <label className="block text-sm font-medium mb-1">
                 Subdepartment
@@ -693,6 +819,7 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
               )}
             </div>
 
+            {/* PLAZA */}
             {isTmsUser && (
               <div>
                 <label className="block text-sm font-medium mb-1">
@@ -737,7 +864,9 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
             )}
           </div>
 
+          {/* BUTTONS */}
           <div className="flex justify-end gap-3 mt-6">
+
             <button
               type="button"
               onClick={onCancel}
@@ -759,6 +888,7 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
                 ? "Update User"
                 : "Create User"}
             </button>
+
           </div>
         </form>
       </div>
@@ -767,3 +897,4 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
 };
 
 export default UserForm;
+
