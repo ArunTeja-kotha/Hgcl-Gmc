@@ -6,7 +6,7 @@ const NodalOfficerPendingGrievances = () => {
     "http://localhost:5163/api/GrievanceComplaints";
 
   const USERS_API_URL =
-    "http://localhost:5163/api/Users";
+    "http://localhost:5163/api/User";
 
   const [grievances, setGrievances] = useState([]);
   const [fieldUsers, setFieldUsers] = useState([]);
