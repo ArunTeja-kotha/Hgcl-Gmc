@@ -6,6 +6,7 @@ const API_URL = "http://localhost:5163/api/GrievanceCategory";
 
 const GrievanceCategory = () => {
   const [categories, setCategories] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -13,6 +14,13 @@ const GrievanceCategory = () => {
   const [editingCategory, setEditingCategory] = useState(null);
 
   const [deletingId, setDeletingId] = useState(null);
+
+const filteredCategories = categories.filter((category) =>
+  category.categoryName
+    ?.toLowerCase()
+    .includes(searchTerm.toLowerCase())
+);
+
   const fetchCategories = async () => {
     try {
       setLoading(true);
@@ -169,14 +177,41 @@ const GrievanceCategory = () => {
         </div>
       )}
 
-      {/* LOADING */}
+      {/* FILTER */}
+<div className="mb-4 rounded-xl border border-[#D5E0EA] bg-white p-4">
+  <div className="flex items-end gap-4">
+
+    <div className="flex-1">
+      <label className="mb-1 block text-sm font-medium text-[#123A63]">
+        Search Category
+      </label>
+
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        placeholder="Search category name..."
+        className="w-full rounded-lg border border-[#D5E0EA] px-4 py-2.5 text-sm text-[#1F2937] outline-none focus:border-[#2563A6]"
+      />
+    </div>
+
+    <button
+      type="button"
+      onClick={() => setSearchTerm("")}
+      className="rounded-lg border border-[#2563A6] px-5 py-2.5 text-sm font-medium text-[#2563A6] transition hover:bg-[#E8F2FB]"
+    >
+      Clear
+    </button>
+
+  </div>
+</div>
       {loading ? (
         <div className="rounded-xl border border-[#D5E0EA] bg-white p-8 text-center text-[#64748B]">
           Loading categories...
         </div>
       ) : (
         <GrievanceCategoryTable
-          categories={categories}
+          categories={filteredCategories}
           deletingId={deletingId}
           onEdit={handleEdit}
           onDelete={handleDelete}

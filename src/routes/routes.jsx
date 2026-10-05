@@ -43,17 +43,6 @@ const AppRoutes = () => {
         element={<Register />}
       />
 
-      {/* ================= DASHBOARD ================= */}
-
-      <Route
-        path="/dashboard"
-        element={
-          <Layout>
-            <Dashboard />
-          </Layout>
-        }
-      />
-
       {/* ================= USER MANAGEMENT ================= */}
 
       <Route

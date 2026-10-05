@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+
 import RegisteredGrievancesTable from "../components/RegisteredGrievanceTable";
 
 const API_BASE = "http://localhost:5163/api";
@@ -21,12 +22,19 @@ const ASSIGN_API =
 
 const RegisteredGrievances = () => {
   const [grievances, setGrievances] = useState([]);
-  const [fieldUsers, setFieldUsers] = useState([]);
 
+  // ==============================
+  // FILTER / SORT
+  // ==============================
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
+
+  const [fieldUsers, setFieldUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fieldUsersLoading, setFieldUsersLoading] =
     useState(false);
-
   const [error, setError] = useState("");
   const [assignError, setAssignError] = useState("");
 
@@ -37,6 +45,65 @@ const RegisteredGrievances = () => {
     useState("");
 
   const [assigning, setAssigning] = useState(false);
+
+  // =========================================================
+  // FILTERED + SORTED GRIEVANCES
+  // =========================================================
+
+  const filteredGrievances = grievances
+    .filter((grievance) => {
+      const search = searchTerm.toLowerCase();
+
+      return (
+        grievance.grievanceCode
+          ?.toLowerCase()
+          .includes(search) ||
+
+        grievance.categoryName
+          ?.toLowerCase()
+          .includes(search) ||
+
+        grievance.subCategoryName
+          ?.toLowerCase()
+          .includes(search) ||
+
+        grievance.status
+          ?.toLowerCase()
+          .includes(search)
+      );
+    })
+    .sort((a, b) => {
+      if (!sortBy) {
+        return 0;
+      }
+
+      let valueA = a[sortBy];
+      let valueB = b[sortBy];
+
+      // Sort Created Date properly
+      if (sortBy === "createdAt") {
+        valueA = valueA
+          ? new Date(valueA).getTime()
+          : 0;
+
+        valueB = valueB
+          ? new Date(valueB).getTime()
+          : 0;
+      } else {
+        valueA = String(valueA ?? "").toLowerCase();
+        valueB = String(valueB ?? "").toLowerCase();
+      }
+
+      if (valueA < valueB) {
+        return sortOrder === "asc" ? -1 : 1;
+      }
+
+      if (valueA > valueB) {
+        return sortOrder === "asc" ? 1 : -1;
+      }
+
+      return 0;
+    });
 
   // =========================================================
   // GET LOGGED-IN ROLE
@@ -266,6 +333,16 @@ const RegisteredGrievances = () => {
   };
 
   // =========================================================
+  // CLEAR FILTERS
+  // =========================================================
+
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setSortBy("");
+    setSortOrder("asc");
+  };
+
+  // =========================================================
   // INITIAL LOAD
   // =========================================================
 
@@ -314,10 +391,117 @@ const RegisteredGrievances = () => {
       )}
 
       {/* =====================================================
+          FILTER / SORT
+          ===================================================== */}
+
+      {!loading && (
+        <div className="mb-4 rounded-xl border border-[#D5E0EA] bg-white p-4">
+
+          <div className="flex flex-wrap items-end gap-4">
+
+            {/* SEARCH */}
+
+            <div className="min-w-60 flex-1">
+              <label className="mb-1 block text-sm font-medium text-[#123A63]">
+                Search Grievances
+              </label>
+
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) =>
+                  setSearchTerm(e.target.value)
+                }
+                placeholder="Search grievance code, category, subcategory or status..."
+                className="w-full rounded-lg border border-[#D5E0EA] px-4 py-2.5 text-sm text-[#1F2937] outline-none focus:border-[#2563A6]"
+              />
+            </div>
+
+            {/* SORT BY */}
+
+            <div className="w-48">
+              <label className="mb-1 block text-sm font-medium text-[#123A63]">
+                Sort By
+              </label>
+
+              <select
+                value={sortBy}
+                onChange={(e) =>
+                  setSortBy(e.target.value)
+                }
+                className="w-full rounded-lg border border-[#D5E0EA] bg-white px-3 py-2.5 text-sm text-[#123A63] outline-none focus:border-[#2563A6]"
+              >
+                <option value="">
+                  Default
+                </option>
+
+                <option value="grievanceCode">
+                  Grievance Code
+                </option>
+
+                <option value="categoryName">
+                  Category
+                </option>
+
+                <option value="subCategoryName">
+                  Subcategory
+                </option>
+
+                <option value="status">
+                  Status
+                </option>
+
+                <option value="createdAt">
+                  Created Date
+                </option>
+              </select>
+            </div>
+
+            {/* SORT ORDER */}
+
+            <div className="w-40">
+              <label className="mb-1 block text-sm font-medium text-[#123A63]">
+                Order
+              </label>
+
+              <select
+                value={sortOrder}
+                onChange={(e) =>
+                  setSortOrder(e.target.value)
+                }
+                className="w-full rounded-lg border border-[#D5E0EA] bg-white px-3 py-2.5 text-sm text-[#123A63] outline-none focus:border-[#2563A6]"
+              >
+                <option value="asc">
+                  Ascending
+                </option>
+
+                <option value="desc">
+                  Descending
+                </option>
+              </select>
+            </div>
+
+            {/* CLEAR */}
+
+            <button
+              type="button"
+              onClick={handleClearFilters}
+              className="rounded-lg border border-[#2563A6] px-5 py-2.5 text-sm font-medium text-[#2563A6] transition hover:bg-[#E8F2FB]"
+            >
+              Clear
+            </button>
+
+          </div>
+
+        </div>
+      )}
+
+      {/* =====================================================
           GRIEVANCE TABLE
           ===================================================== */}
 
       {loading ? (
+
         <div className="rounded-xl border border-[#D5E0EA] bg-white p-10 text-center">
 
           <p className="text-[#64748B]">
@@ -325,12 +509,15 @@ const RegisteredGrievances = () => {
           </p>
 
         </div>
+
       ) : (
+
         <RegisteredGrievancesTable
-          grievances={grievances}
+          grievances={filteredGrievances}
           onAssign={handleOpenAssign}
           canAssign={canAssign}
         />
+
       )}
 
       {/* =====================================================
@@ -338,11 +525,13 @@ const RegisteredGrievances = () => {
           ===================================================== */}
 
       {selectedGrievance && canAssign && (
+
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
 
           <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
 
             {/* Modal Header */}
+
             <div className="border-b border-[#D5E0EA] px-6 py-4">
 
               <h2 className="text-lg font-semibold text-[#123A63]">
@@ -351,6 +540,7 @@ const RegisteredGrievances = () => {
 
               <p className="mt-1 text-sm text-[#64748B]">
                 Grievance Code:{" "}
+
                 <span className="font-medium text-[#123A63]">
                   {selectedGrievance.grievanceCode ||
                     "-"}
@@ -360,6 +550,7 @@ const RegisteredGrievances = () => {
             </div>
 
             {/* Modal Body */}
+
             <div className="px-6 py-5">
 
               <label className="mb-2 block text-sm font-medium text-[#123A63]">
@@ -406,6 +597,7 @@ const RegisteredGrievances = () => {
               </select>
 
               {/* Assignment Error */}
+
               {assignError && (
                 <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
                   {assignError}
@@ -415,6 +607,7 @@ const RegisteredGrievances = () => {
             </div>
 
             {/* Modal Footer */}
+
             <div className="flex justify-end gap-3 border-t border-[#D5E0EA] px-6 py-4">
 
               <button
@@ -446,6 +639,7 @@ const RegisteredGrievances = () => {
           </div>
 
         </div>
+
       )}
 
     </div>
@@ -453,6 +647,3 @@ const RegisteredGrievances = () => {
 };
 
 export default RegisteredGrievances;
-
-
-

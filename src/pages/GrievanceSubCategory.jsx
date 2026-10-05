@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
+
 import axios from "axios";
 
 import GrievanceSubCategoryTable from "../components/GrievanceSubCategoryTable";
+
 import GrievanceSubCategoryForm from "../components/GrievanceSubCategoryForm";
 
 const SUB_CATEGORY_API =
@@ -17,15 +19,20 @@ const GrievanceSubCategory = () => {
   const [subCategories, setSubCategories] = useState([]);
   const [categories, setCategories] = useState([]);
   const [users, setUsers] = useState([]);
-
   const [loading, setLoading] = useState(true);
 
   const [showForm, setShowForm] = useState(false);
-
   const [editingSubCategory, setEditingSubCategory] =
     useState(null);
-
   const [deletingId, setDeletingId] = useState(null);
+
+  // ============================================
+  // FILTER / SORT
+  // ============================================
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
 
   // ============================================
   // TOKEN
@@ -288,6 +295,55 @@ const GrievanceSubCategory = () => {
   };
 
   // ============================================
+  // FILTER + SORT
+  // ============================================
+
+  const filteredSubCategories = subCategories
+    .filter((subCategory) => {
+      const search = searchTerm.toLowerCase();
+
+      return (
+        subCategory.subCategoryName
+          ?.toLowerCase()
+          .includes(search) ||
+        subCategory.categoryName
+          ?.toLowerCase()
+          .includes(search)
+      );
+    })
+    .sort((a, b) => {
+      if (!sortBy) {
+        return 0;
+      }
+
+      let valueA = a[sortBy];
+      let valueB = b[sortBy];
+
+      valueA = String(valueA ?? "").toLowerCase();
+      valueB = String(valueB ?? "").toLowerCase();
+
+      if (valueA < valueB) {
+        return sortOrder === "asc" ? -1 : 1;
+      }
+
+      if (valueA > valueB) {
+        return sortOrder === "asc" ? 1 : -1;
+      }
+
+      return 0;
+    });
+
+  // ============================================
+  // CLEAR FILTERS
+  // ============================================
+
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setSortBy("");
+    setSortOrder("asc");
+  };
+
+  // ============================================
   // PAGE
   // ============================================
 
@@ -299,7 +355,6 @@ const GrievanceSubCategory = () => {
       ======================================== */}
 
       <div className="mb-6 flex items-center justify-between">
-
         <div>
           <h1 className="text-2xl font-semibold text-[#123A63]">
             Grievance Sub Categories
@@ -320,7 +375,6 @@ const GrievanceSubCategory = () => {
             + Add Sub Category
           </button>
         )}
-
       </div>
 
       {/* ========================================
@@ -329,46 +383,125 @@ const GrievanceSubCategory = () => {
 
       {showForm && (
         <div className="mb-6">
-
           <GrievanceSubCategoryForm
             categories={categories}
             editingSubCategory={editingSubCategory}
             onSuccess={handleFormSuccess}
             onCancel={handleCancel}
           />
-
         </div>
       )}
 
       {/* ========================================
-          LOADING
+          FILTER / SORT
+      ======================================== */}
+
+      {!loading && (
+        <div className="mb-4 rounded-xl border border-[#D5E0EA] bg-white p-4">
+          <div className="flex flex-wrap items-end gap-4">
+
+            {/* SEARCH */}
+
+            <div className="min-w-60 flex-1">
+              <label className="mb-1 block text-sm font-medium text-[#123A63]">
+                Search Sub Categories
+              </label>
+
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) =>
+                  setSearchTerm(e.target.value)
+                }
+                placeholder="Search subcategory or category..."
+                className="w-full rounded-lg border border-[#D5E0EA] px-4 py-2.5 text-sm text-[#1F2937] outline-none focus:border-[#2563A6]"
+              />
+            </div>
+
+            {/* SORT BY */}
+
+            <div className="w-48">
+              <label className="mb-1 block text-sm font-medium text-[#123A63]">
+                Sort By
+              </label>
+
+              <select
+                value={sortBy}
+                onChange={(e) =>
+                  setSortBy(e.target.value)
+                }
+                className="w-full rounded-lg border border-[#D5E0EA] px-4 py-2.5 text-sm text-[#1F2937] outline-none focus:border-[#2563A6]"
+              >
+                <option value="">
+                  Default
+                </option>
+
+                <option value="subCategoryName">
+                  Sub Category
+                </option>
+
+                <option value="categoryName">
+                  Category
+                </option>
+              </select>
+            </div>
+
+            {/* ORDER */}
+
+            <div className="w-40">
+              <label className="mb-1 block text-sm font-medium text-[#123A63]">
+                Order
+              </label>
+
+              <select
+                value={sortOrder}
+                onChange={(e) =>
+                  setSortOrder(e.target.value)
+                }
+                className="w-full rounded-lg border border-[#D5E0EA] px-4 py-2.5 text-sm text-[#1F2937] outline-none focus:border-[#2563A6]"
+              >
+                <option value="asc">
+                  Ascending
+                </option>
+
+                <option value="desc">
+                  Descending
+                </option>
+              </select>
+            </div>
+
+            {/* CLEAR */}
+
+            <button
+              type="button"
+              onClick={handleClearFilters}
+              className="rounded-lg border border-[#2563A6] px-5 py-2.5 text-sm font-medium text-[#2563A6] transition hover:bg-[#E8F2FB]"
+            >
+              Clear
+            </button>
+
+          </div>
+        </div>
+      )}
+
+      {/* ========================================
+          LOADING / TABLE
       ======================================== */}
 
       {loading ? (
-
         <div className="rounded-xl border border-[#D5E0EA] bg-white p-10 text-center">
-
           <p className="text-[#64748B]">
             Loading grievance subcategories...
           </p>
-
         </div>
-
       ) : (
-
-        /* ======================================
-           TABLE
-        ====================================== */
-
         <GrievanceSubCategoryTable
-          subCategories={subCategories}
+          subCategories={filteredSubCategories}
           deletingId={deletingId}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />
-
       )}
-
     </div>
   );
 };

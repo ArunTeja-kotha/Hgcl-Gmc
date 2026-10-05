@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+
 import axios from "axios";
 
 const UserForm = ({ editingUser, onSuccess, onCancel }) => {
@@ -6,11 +7,9 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
   const [departments, setDepartments] = useState([]);
   const [subdepartments, setSubdepartments] = useState([]);
   const [plazas, setPlazas] = useState([]);
-
   const [loading, setLoading] = useState(false);
   const [loadingSubdepartments, setLoadingSubdepartments] = useState(false);
   const [loadingPlazas, setLoadingPlazas] = useState(false);
-
   const [errors, setErrors] = useState({});
 
   const emptyForm = {
@@ -189,6 +188,11 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
   const isTmsUser =
     selectedRole?.roleName?.trim().toLowerCase() === "tms user";
 
+  // ADDED: CHECK SUPER ADMINISTRATOR
+  const isSuperAdminUser =
+    selectedRole?.roleName?.trim().toLowerCase() ===
+    "super administrator";
+
   // --------------------------------------------------
   // LOAD PLAZAS WHEN TMS USER IS SELECTED
   // --------------------------------------------------
@@ -325,6 +329,7 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
     const password = formData.password;
 
     // First Name
+
     if (!firstName) {
       newErrors.firstName = "First name is required.";
     } else if (firstName.length < 2) {
@@ -339,6 +344,7 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
     }
 
     // Last Name
+
     if (!lastName) {
       newErrors.lastName = "Last name is required.";
     } else if (lastName.length < 2) {
@@ -353,6 +359,7 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
     }
 
     // Email
+
     if (!email) {
       newErrors.email = "Email is required.";
     } else if (email.length > 100) {
@@ -366,6 +373,7 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
     }
 
     // Phone
+
     if (!phoneNumber) {
       newErrors.phoneNumber =
         "Phone number is required.";
@@ -375,6 +383,7 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
     }
 
     // Password - Create only
+
     if (!isEditMode) {
       if (!password) {
         newErrors.password = "Password is required.";
@@ -397,23 +406,27 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
     }
 
     // Role
+
     if (!formData.roleId) {
       newErrors.roleId = "Please select a role.";
     }
 
     // Department
+
     if (!formData.departmentId) {
       newErrors.departmentId =
         "Please select a department.";
     }
 
     // Subdepartment
+
     if (!formData.subdepartmentId) {
       newErrors.subdepartmentId =
         "Please select a subdepartment.";
     }
 
     // Plaza only for TMS User
+
     if (isTmsUser && !formData.plazaId) {
       newErrors.plazaId =
         "Please select a plaza.";
@@ -443,15 +456,11 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
         lastName: sanitizeName(formData.lastName).trim(),
         email: sanitizeEmail(formData.email).trim(),
         phoneNumber: sanitizePhone(formData.phoneNumber).trim(),
-
         roleId: Number(formData.roleId),
-
         departmentId: Number(formData.departmentId),
-
         subdepartmentId: Number(
           formData.subdepartmentId
         ),
-
         plazaId: isTmsUser
           ? Number(formData.plazaId)
           : null,
@@ -542,9 +551,13 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
 
+        {/* HEADER */}
+
         <div className="flex justify-between items-center px-6 py-4 border-b">
           <h2 className="text-xl font-semibold text-[#123A63]">
-            {isEditMode
+            {isSuperAdminUser
+              ? "Protected User"
+              : isEditMode
               ? "Edit User"
               : "Create User"}
           </h2>
@@ -558,343 +571,389 @@ const UserForm = ({ editingUser, onSuccess, onCancel }) => {
           </button>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="p-6"
-        >
-          <div className="grid grid-cols-2 gap-4">
+        {/* --------------------------------------------------
+            SUPER ADMINISTRATOR PROTECTED VIEW
+        -------------------------------------------------- */}
 
-            {/* FIRST NAME */}
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                First Name
-              </label>
+        {isSuperAdminUser ? (
+          <div className="p-8 text-center">
 
-              <input
-                type="text"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                maxLength={50}
-                className={`w-full border rounded-md px-3 py-2 ${
-                  errors.firstName
-                    ? "border-red-500"
-                    : "border-gray-300"
-                }`}
-              />
-
-              {errors.firstName && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.firstName}
-                </p>
-              )}
+            <div className="text-4xl mb-4">
+              🔒
             </div>
 
-            {/* LAST NAME */}
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Last Name
-              </label>
+            <h3 className="text-lg font-semibold text-[#123A63]">
+              Protected User
+            </h3>
 
-              <input
-                type="text"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                maxLength={50}
-                className={`w-full border rounded-md px-3 py-2 ${
-                  errors.lastName
-                    ? "border-red-500"
-                    : "border-gray-300"
-                }`}
-              />
+            <p className="text-sm text-gray-500 mt-2">
+              The Super Administrator account is protected
+              and cannot be edited or deleted.
+            </p>
 
-              {errors.lastName && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.lastName}
-                </p>
-              )}
-            </div>
+            <button
+              type="button"
+              onClick={onCancel}
+              className="mt-6 px-5 py-2 bg-[#123A63] text-white rounded-md hover:bg-[#1D4F85]"
+            >
+              Close
+            </button>
 
-            {/* EMAIL */}
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Email
-              </label>
+          </div>
+        ) : (
 
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                maxLength={100}
-                className={`w-full border rounded-md px-3 py-2 ${
-                  errors.email
-                    ? "border-red-500"
-                    : "border-gray-300"
-                }`}
-              />
+          /* --------------------------------------------------
+             EXISTING USER FORM
+          -------------------------------------------------- */
 
-              {errors.email && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.email}
-                </p>
-              )}
-            </div>
+          <form
+            onSubmit={handleSubmit}
+            className="p-6"
+          >
+            <div className="grid grid-cols-2 gap-4">
 
-            {/* PHONE */}
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Phone Number
-              </label>
+              {/* FIRST NAME */}
 
-              <input
-                type="text"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                inputMode="numeric"
-                maxLength={10}
-                className={`w-full border rounded-md px-3 py-2 ${
-                  errors.phoneNumber
-                    ? "border-red-500"
-                    : "border-gray-300"
-                }`}
-              />
-
-              {errors.phoneNumber && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.phoneNumber}
-                </p>
-              )}
-            </div>
-
-            {/* PASSWORD */}
-            {!isEditMode && (
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Password
+                  First Name
                 </label>
 
                 <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
+                  type="text"
+                  name="firstName"
+                  value={formData.firstName}
                   onChange={handleChange}
-                  maxLength={100}
-                  placeholder="Enter password"
+                  maxLength={50}
                   className={`w-full border rounded-md px-3 py-2 ${
-                    errors.password
+                    errors.firstName
                       ? "border-red-500"
                       : "border-gray-300"
                   }`}
                 />
 
-                {errors.password && (
+                {errors.firstName && (
                   <p className="text-red-500 text-xs mt-1">
-                    {errors.password}
+                    {errors.firstName}
                   </p>
                 )}
               </div>
-            )}
 
-            {/* ROLE */}
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Role
-              </label>
+              {/* LAST NAME */}
 
-              <select
-                name="roleId"
-                value={formData.roleId}
-                onChange={handleChange}
-                className={`w-full border rounded-md px-3 py-2 ${
-                  errors.roleId
-                    ? "border-red-500"
-                    : "border-gray-300"
-                }`}
-              >
-                <option value="">
-                  Select Role
-                </option>
-
-                {roles.map((role) => (
-                  <option
-                    key={role.roleId}
-                    value={role.roleId}
-                  >
-                    {role.roleName}
-                  </option>
-                ))}
-              </select>
-
-              {errors.roleId && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.roleId}
-                </p>
-              )}
-            </div>
-
-            {/* DEPARTMENT */}
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Department
-              </label>
-
-              <select
-                name="departmentId"
-                value={formData.departmentId}
-                onChange={handleChange}
-                className={`w-full border rounded-md px-3 py-2 ${
-                  errors.departmentId
-                    ? "border-red-500"
-                    : "border-gray-300"
-                }`}
-              >
-                <option value="">
-                  Select Department
-                </option>
-
-                {departments.map((department) => (
-                  <option
-                    key={department.departmentId}
-                    value={department.departmentId}
-                  >
-                    {department.departmentName}
-                  </option>
-                ))}
-              </select>
-
-              {errors.departmentId && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.departmentId}
-                </p>
-              )}
-            </div>
-
-            {/* SUBDEPARTMENT */}
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Subdepartment
-              </label>
-
-              <select
-                name="subdepartmentId"
-                value={formData.subdepartmentId}
-                onChange={handleChange}
-                disabled={
-                  !formData.departmentId ||
-                  loadingSubdepartments
-                }
-                className={`w-full border rounded-md px-3 py-2 disabled:bg-gray-100 ${
-                  errors.subdepartmentId
-                    ? "border-red-500"
-                    : "border-gray-300"
-                }`}
-              >
-                <option value="">
-                  {!formData.departmentId
-                    ? "Select Department First"
-                    : loadingSubdepartments
-                    ? "Loading Subdepartments..."
-                    : subdepartments.length === 0
-                    ? "No Subdepartments Found"
-                    : "Select Subdepartment"}
-                </option>
-
-                {subdepartments.map((subdepartment) => (
-                  <option
-                    key={subdepartment.subdepartmentId}
-                    value={subdepartment.subdepartmentId}
-                  >
-                    {subdepartment.subdepartmentName}
-                  </option>
-                ))}
-              </select>
-
-              {errors.subdepartmentId && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.subdepartmentId}
-                </p>
-              )}
-            </div>
-
-            {/* PLAZA */}
-            {isTmsUser && (
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Plaza
+                  Last Name
+                </label>
+
+                <input
+                  type="text"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  maxLength={50}
+                  className={`w-full border rounded-md px-3 py-2 ${
+                    errors.lastName
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                />
+
+                {errors.lastName && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.lastName}
+                  </p>
+                )}
+              </div>
+
+              {/* EMAIL */}
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Email
+                </label>
+
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  maxLength={100}
+                  className={`w-full border rounded-md px-3 py-2 ${
+                    errors.email
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                />
+
+                {errors.email && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.email}
+                  </p>
+                )}
+              </div>
+
+              {/* PHONE */}
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Phone Number
+                </label>
+
+                <input
+                  type="text"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  inputMode="numeric"
+                  maxLength={10}
+                  className={`w-full border rounded-md px-3 py-2 ${
+                    errors.phoneNumber
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                />
+
+                {errors.phoneNumber && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.phoneNumber}
+                  </p>
+                )}
+              </div>
+
+              {/* PASSWORD */}
+
+              {!isEditMode && (
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Password
+                  </label>
+
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    maxLength={100}
+                    placeholder="Enter password"
+                    className={`w-full border rounded-md px-3 py-2 ${
+                      errors.password
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
+                  />
+
+                  {errors.password && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.password}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* ROLE */}
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Role
                 </label>
 
                 <select
-                  name="plazaId"
-                  value={formData.plazaId}
+                  name="roleId"
+                  value={formData.roleId}
                   onChange={handleChange}
-                  disabled={loadingPlazas}
-                  className={`w-full border rounded-md px-3 py-2 disabled:bg-gray-100 ${
-                    errors.plazaId
+                  className={`w-full border rounded-md px-3 py-2 ${
+                    errors.roleId
                       ? "border-red-500"
                       : "border-gray-300"
                   }`}
                 >
                   <option value="">
-                    {loadingPlazas
-                      ? "Loading Plazas..."
-                      : plazas.length === 0
-                      ? "No Plazas Found"
-                      : "Select Plaza"}
+                    Select Role
                   </option>
 
-                  {plazas.map((plaza) => (
+                  {roles.map((role) => (
                     <option
-                      key={plaza.Plaza_id}
-                      value={plaza.Plaza_id}
+                      key={role.roleId}
+                      value={role.roleId}
                     >
-                      {plaza.Plaza_name}
+                      {role.roleName}
                     </option>
                   ))}
                 </select>
 
-                {errors.plazaId && (
+                {errors.roleId && (
                   <p className="text-red-500 text-xs mt-1">
-                    {errors.plazaId}
+                    {errors.roleId}
                   </p>
                 )}
               </div>
-            )}
-          </div>
 
-          {/* BUTTONS */}
-          <div className="flex justify-end gap-3 mt-6">
+              {/* DEPARTMENT */}
 
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-4 py-2 border rounded-md"
-            >
-              Cancel
-            </button>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Department
+                </label>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-4 py-2 bg-[#123A63] text-white rounded-md hover:bg-[#1D4F85] disabled:opacity-50"
-            >
-              {loading
-                ? isEditMode
-                  ? "Updating..."
-                  : "Creating..."
-                : isEditMode
-                ? "Update User"
-                : "Create User"}
-            </button>
+                <select
+                  name="departmentId"
+                  value={formData.departmentId}
+                  onChange={handleChange}
+                  className={`w-full border rounded-md px-3 py-2 ${
+                    errors.departmentId
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                >
+                  <option value="">
+                    Select Department
+                  </option>
 
-          </div>
-        </form>
+                  {departments.map((department) => (
+                    <option
+                      key={department.departmentId}
+                      value={department.departmentId}
+                    >
+                      {department.departmentName}
+                    </option>
+                  ))}
+                </select>
+
+                {errors.departmentId && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.departmentId}
+                  </p>
+                )}
+              </div>
+
+              {/* SUBDEPARTMENT */}
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Subdepartment
+                </label>
+
+                <select
+                  name="subdepartmentId"
+                  value={formData.subdepartmentId}
+                  onChange={handleChange}
+                  disabled={
+                    !formData.departmentId ||
+                    loadingSubdepartments
+                  }
+                  className={`w-full border rounded-md px-3 py-2 disabled:bg-gray-100 ${
+                    errors.subdepartmentId
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                >
+                  <option value="">
+                    {!formData.departmentId
+                      ? "Select Department First"
+                      : loadingSubdepartments
+                      ? "Loading Subdepartments..."
+                      : subdepartments.length === 0
+                      ? "No Subdepartments Found"
+                      : "Select Subdepartment"}
+                  </option>
+
+                  {subdepartments.map((subdepartment) => (
+                    <option
+                      key={subdepartment.subdepartmentId}
+                      value={subdepartment.subdepartmentId}
+                    >
+                      {subdepartment.subdepartmentName}
+                    </option>
+                  ))}
+                </select>
+
+                {errors.subdepartmentId && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.subdepartmentId}
+                  </p>
+                )}
+              </div>
+
+              {/* PLAZA */}
+
+              {isTmsUser && (
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Plaza
+                  </label>
+
+                  <select
+                    name="plazaId"
+                    value={formData.plazaId}
+                    onChange={handleChange}
+                    disabled={loadingPlazas}
+                    className={`w-full border rounded-md px-3 py-2 disabled:bg-gray-100 ${
+                      errors.plazaId
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
+                  >
+                    <option value="">
+                      {loadingPlazas
+                        ? "Loading Plazas..."
+                        : plazas.length === 0
+                        ? "No Plazas Found"
+                        : "Select Plaza"}
+                    </option>
+
+                    {plazas.map((plaza) => (
+                      <option
+                        key={plaza.Plaza_id}
+                        value={plaza.Plaza_id}
+                      >
+                        {plaza.Plaza_name}
+                      </option>
+                    ))}
+                  </select>
+
+                  {errors.plazaId && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.plazaId}
+                    </p>
+                  )}
+                </div>
+              )}
+
+            </div>
+
+            {/* BUTTONS */}
+
+            <div className="flex justify-end gap-3 mt-6">
+
+              <button
+                type="button"
+                onClick={onCancel}
+                className="px-4 py-2 border rounded-md"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-4 py-2 bg-[#123A63] text-white rounded-md hover:bg-[#1D4F85] disabled:opacity-50"
+              >
+                {loading
+                  ? isEditMode
+                    ? "Updating..."
+                    : "Creating..."
+                  : isEditMode
+                  ? "Update User"
+                  : "Create User"}
+              </button>
+
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );
 };
 
 export default UserForm;
-

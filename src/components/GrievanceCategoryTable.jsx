@@ -90,7 +90,7 @@ const GrievanceCategoryTable = ({
               >
 
                 {/* CATEGORY NAME */}
-                <td className="px-5 py-4 text-sm font-medium text-[#1F2937]">
+                <td className="px-5 py-4 text-sm  text-[#1F2937]">
                   {category.categoryName || "-"}
                 </td>
 

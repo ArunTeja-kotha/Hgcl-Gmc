@@ -611,45 +611,40 @@ const Users = () => {
 
                       </td>
 
-                      {/* Actions */}
+                     {/* Actions */}
+<td className="px-5 py-3">
+  {userRole?.roleName?.trim() === "Super Administrator" ? (
+    <span className="inline-flex items-center rounded-lg  px-4 py-2 text-sm font-medium text-gray-600">
+     Protected
+    </span>
+  ) : (
+    <div className="flex gap-2">
+      {/* Edit */}
+      <button
+        type="button"
+        onClick={() =>
+          handleEdit(user.userId)
+        }
+        className="rounded-lg border border-[#2563A6] px-4 py-2 text-sm font-medium text-[#2563A6] hover:bg-[#E8F2FB]"
+      >
+        Edit
+      </button>
 
-                      <td className="px-5 py-3">
-
-                        <div className="flex gap-2">
-
-                          {/* Edit - available */}
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleEdit(
-                                user.userId
-                              )
-                            }
-                            className="rounded-lg border border-[#2563A6] px-4 py-2 text-sm font-medium text-[#2563A6] hover:bg-[#E8F2FB]"
-                          >
-                            Edit
-                          </button>
-
-                          {/* Delete - Super Admin ONLY */}
-
-                          {isSuperAdmin && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleDelete(
-                                  user.userId
-                                )
-                              }
-                              className="rounded-lg border border-red-600 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
-                            >
-                              Delete
-                            </button>
-                          )}
-
-                        </div>
-
-                      </td>
+      {/* Delete - Super Admin ONLY */}
+      {isSuperAdmin && (
+        <button
+          type="button"
+          onClick={() =>
+            handleDelete(user.userId)
+          }
+          className="rounded-lg border border-red-600 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+        >
+          Delete
+        </button>
+      )}
+    </div>
+  )}
+</td>
 
                     </tr>
                   );

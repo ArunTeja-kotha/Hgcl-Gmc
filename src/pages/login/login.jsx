@@ -121,9 +121,7 @@ const Login = () => {
         navigate("/nodal/grievances");
       } else if (role === "Citizen") {
         navigate("/citizen/grievances/my");
-      } else {
-        navigate("/dashboard");
-      }
+      } 
     } catch (error) {
       console.error("Login failed:", error);
 

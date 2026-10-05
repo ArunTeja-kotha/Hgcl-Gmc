@@ -148,7 +148,7 @@ const GrievanceSubCategoryTable = ({
                       onClick={() =>
                         onEdit(subCategory)
                       }
-                      className="rounded-lg bg-[#E8F2FB] px-3 py-2 text-sm font-medium text-[#2563A6] transition hover:bg-[#B9D8F2]"
+                      className="rounded-lg border border-[#2563A6] px-3 py-1.5 text-sm font-medium text-[#2563A6] transition hover:bg-[#E8F2FB]"
                     >
                       Edit
                     </button>
@@ -166,7 +166,7 @@ const GrievanceSubCategoryTable = ({
                         deletingId ===
                         subCategory.subCategoryId
                       }
-                      className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {deletingId ===
                       subCategory.subCategoryId
