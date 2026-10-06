@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import React, { useState } from "react";
 import axios from "axios";
+
 import loginBackground from "../../assets/gmclogin.png";
 
 const Login = () => {
@@ -11,11 +12,15 @@ const Login = () => {
   const [password, setPassword] = useState("");
 
   // ============================================
-  // Get Role / Name / Account Type from JWT Token
+  // Decode JWT Token
   // ============================================
   const getTokenData = (token) => {
     try {
       const payload = token.split(".")[1];
+
+      if (!payload) {
+        throw new Error("Invalid JWT token");
+      }
 
       const decodedPayload = JSON.parse(
         atob(payload.replace(/-/g, "+").replace(/_/g, "/"))
@@ -23,31 +28,44 @@ const Login = () => {
 
       console.log("JWT Payload:", decodedPayload);
 
-      // --------------------------------------------
+      // ============================================
       // Get Role
-      // --------------------------------------------
-      const role =
+      // ============================================
+      const rawRole =
         decodedPayload.role ||
         decodedPayload[
           "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
         ];
 
-      // --------------------------------------------
+      // ============================================
       // Get User Name
-      // --------------------------------------------
+      // ============================================
       const userName =
         decodedPayload[
           "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
         ] || decodedPayload.name;
 
-      // --------------------------------------------
-      // Citizen JWT does not have Role claim
-      // --------------------------------------------
+      // ============================================
+      // Normalize Role
+      // ============================================
+      const normalizedRole =
+        typeof rawRole === "string"
+          ? rawRole.trim()
+          : null;
+
+      // ============================================
+      // Citizen JWT
+      // ============================================
       const finalRole =
-        role ||
+        normalizedRole ||
         (decodedPayload.AccountType === "Citizen"
           ? "Citizen"
           : null);
+
+      console.log("Raw Role:", rawRole);
+      console.log("Normalized Role:", normalizedRole);
+      console.log("Final Role:", finalRole);
+      console.log("User Name:", userName);
 
       return {
         role: finalRole,
@@ -62,10 +80,19 @@ const Login = () => {
       };
     }
   };
+
+  // ============================================
+  // Handle Login
+  // ============================================
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
+      console.log("Login started...");
+
+      // ============================================
+      // Login API
+      // ============================================
       const response = await axios.post(
         "http://localhost:5163/api/Auth/login",
         {
@@ -75,11 +102,31 @@ const Login = () => {
       );
 
       console.log("Login successful:", response.data);
-      const token = response.data.token;
-      localStorage.setItem("token", token);
 
       // ============================================
-      // Get Role and Name from JWT
+      // Get Token
+      // ============================================
+      const token = response.data?.token;
+
+      if (!token) {
+        console.error("Token was not received.");
+
+        alert(
+          "Login failed. Authentication token was not received."
+        );
+
+        return;
+      }
+
+      // ============================================
+      // Store Token
+      // ============================================
+      localStorage.setItem("token", token);
+
+      console.log("Token stored successfully.");
+
+      // ============================================
+      // Decode Token
       // ============================================
       const { role, userName } = getTokenData(token);
 
@@ -87,14 +134,25 @@ const Login = () => {
       console.log("Logged in user name:", userName);
 
       // ============================================
+      // Validate Role
+      // ============================================
+      if (!role) {
+        console.error("No valid role found in JWT.");
+
+        localStorage.removeItem("role");
+        localStorage.removeItem("userName");
+
+        alert(
+          "Login successful, but user role was not found."
+        );
+
+        return;
+      }
+
+      // ============================================
       // Store Role
       // ============================================
-      if (role) {
-        localStorage.setItem("role", role);
-      } else {
-        localStorage.removeItem("role");
-        console.warn("No role or account type found in JWT.");
-      }
+      localStorage.setItem("role", role);
 
       // ============================================
       // Store User Name
@@ -103,40 +161,174 @@ const Login = () => {
         localStorage.setItem("userName", userName);
       } else {
         localStorage.removeItem("userName");
-        console.warn("No user name found in JWT.");
       }
 
       // ============================================
-      // Navigate based on Role
+      // Normalize Role Before Navigation
       // ============================================
-      if (role === "Super Administrator") {
-        navigate("/users");
-      } else if (role === "Web Administrator") {
-        navigate("/users");
-      } else if (role === "TMS User") {
-        navigate("/tms/grievances");
-      } else if (role === "Web User") {
-        navigate("/webuser/grievances");
-      } else if (role === "Nodal Officer") {
-        navigate("/nodal/grievances");
-      } else if (role === "Citizen") {
-        navigate("/citizen/grievances/my");
-      } 
+      const normalizedRole = role.trim();
+
+      console.log("=================================");
+      console.log("ROLE BEFORE NAVIGATION:", role);
+      console.log("NORMALIZED ROLE:", normalizedRole);
+      console.log(
+        "CURRENT URL:",
+        window.location.pathname
+      );
+      console.log("=================================");
+
+      // ============================================
+      // Navigate Based on Role
+      // ============================================
+      switch (normalizedRole) {
+        // ============================================
+        // SUPER ADMINISTRATOR
+        // ============================================
+        case "Super Administrator":
+          console.log(
+            "SUPER ADMINISTRATOR CONDITION MATCHED"
+          );
+
+          navigate("/users", {
+            replace: true,
+          });
+
+          break;
+
+        // ============================================
+        // WEB ADMINISTRATOR
+        // ============================================
+        case "Web Administrator":
+          console.log(
+            "WEB ADMINISTRATOR CONDITION MATCHED"
+          );
+
+          navigate("/users", {
+            replace: true,
+          });
+
+          break;
+
+        // ============================================
+        // TMS USER
+        // ============================================
+        case "TMS User":
+          console.log(
+            "TMS USER CONDITION MATCHED"
+          );
+
+          navigate("/tms/grievances", {
+            replace: true,
+          });
+
+          break;
+
+        // ============================================
+        // WEB USER
+        // ============================================
+        case "Web User":
+          console.log(
+            "WEB USER CONDITION MATCHED"
+          );
+
+          console.log(
+            "Navigating to /webuser/grievances"
+          );
+
+          navigate("/webuser/grievances", {
+            replace: true,
+          });
+
+          break;
+
+        // ============================================
+        // NODAL OFFICER
+        // ============================================
+        case "Nodal Officer":
+          console.log(
+            "NODAL OFFICER CONDITION MATCHED"
+          );
+
+          navigate("/nodal/grievances", {
+            replace: true,
+          });
+
+          break;
+
+        // ============================================
+        // FIELD USER
+        // ============================================
+        case "Field User":
+          console.log(
+            "FIELD USER CONDITION MATCHED"
+          );
+
+          console.log(
+            "Navigating to /field/grievances/assigned"
+          );
+
+          navigate("/field/grievances/assigned", {
+            replace: true,
+          });
+
+          break;
+
+        // ============================================
+        // CITIZEN
+        // ============================================
+        case "Citizen":
+          console.log(
+            "CITIZEN CONDITION MATCHED"
+          );
+
+          navigate("/citizen/grievances/my", {
+            replace: true,
+          });
+
+          break;
+
+        // ============================================
+        // UNKNOWN ROLE
+        // ============================================
+        default:
+          console.warn(
+            "UNKNOWN ROLE:",
+            normalizedRole
+          );
+
+          alert(
+            `Login successful, but no page is configured for role: ${normalizedRole}`
+          );
+
+          break;
+      }
     } catch (error) {
       console.error("Login failed:", error);
 
       if (error.response) {
-        console.error("Status:", error.response.status);
-        console.error("Response:", error.response.data);
+        console.error(
+          "Status:",
+          error.response.status
+        );
+
+        console.error(
+          "Response:",
+          error.response.data
+        );
 
         alert(
           error.response.data?.message ||
             "Invalid email or password."
         );
       } else {
-        console.error("Network Error:", error.message);
+        console.error(
+          "Network Error:",
+          error.message
+        );
 
-        alert("Unable to connect to the server.");
+        alert(
+          "Unable to connect to the server."
+        );
       }
     }
   };
@@ -171,6 +363,9 @@ const Login = () => {
           shadow-xl
         "
       >
+        {/* ============================================
+            Header
+        ============================================ */}
         <div className="text-center mb-7">
           <h1 className="text-2xl font-bold text-blue-950">
             Grievance Management System
@@ -181,14 +376,24 @@ const Login = () => {
           </p>
         </div>
 
+        {/* ============================================
+            Login Form
+        ============================================ */}
         <form
           className="space-y-5"
           onSubmit={handleLogin}
         >
+          {/* Email */}
           <div>
             <label
               htmlFor="email"
-              className="block mb-2 text-sm font-medium text-gray-700"
+              className="
+                block
+                mb-2
+                text-sm
+                font-medium
+                text-gray-700
+              "
             >
               Email / User ID
             </label>
@@ -198,7 +403,9 @@ const Login = () => {
               id="email"
               name="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
               placeholder="Enter your Email / User ID"
               className="
                 block
@@ -222,21 +429,34 @@ const Login = () => {
             />
           </div>
 
+          {/* Password */}
           <div>
             <label
               htmlFor="password"
-              className="block mb-2 text-sm font-medium text-gray-700"
+              className="
+                block
+                mb-2
+                text-sm
+                font-medium
+                text-gray-700
+              "
             >
               Password
             </label>
 
             <div className="relative">
               <input
-                type={showPassword ? "text" : "password"}
+                type={
+                  showPassword
+                    ? "text"
+                    : "password"
+                }
                 id="password"
                 name="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) =>
+                  setPassword(e.target.value)
+                }
                 placeholder="Enter your Password"
                 className="
                   block
@@ -262,7 +482,9 @@ const Login = () => {
 
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() =>
+                  setShowPassword(!showPassword)
+                }
                 className="
                   absolute
                   right-3
@@ -282,6 +504,7 @@ const Login = () => {
             </div>
           </div>
 
+          {/* Login Button */}
           <button
             type="submit"
             className="
@@ -303,13 +526,25 @@ const Login = () => {
           </button>
         </form>
 
+        {/* Register */}
         <div className="mt-6 text-center">
-          <p className="text-center text-sm text-[#64748B] px-6">
+          <p
+            className="
+              text-center
+              text-sm
+              text-[#64748B]
+              px-6
+            "
+          >
             Don't have an account?{" "}
 
             <Link
               to="/register"
-              className="font-semibold text-[#2563A6] hover:text-[#1D4F85]"
+              className="
+                font-semibold
+                text-[#2563A6]
+                hover:text-[#1D4F85]
+              "
             >
               Register
             </Link>

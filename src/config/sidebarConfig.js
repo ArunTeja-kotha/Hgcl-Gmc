@@ -85,29 +85,6 @@ const sidebarConfig = {
         },
       ],
     },
-
-    {
-      menuId: 3,
-      name: "Grievances",
-      route: "/webadmin/grievances",
-      children: [
-        {
-          menuId: 31,
-          name: "All Grievances",
-          route: "/webadmin/grievances",
-        },
-        {
-          menuId: 32,
-          name: "Pending Grievances",
-          route: "/webadmin/grievances/pending",
-        },
-        {
-          menuId: 33,
-          name: "Completed Grievances",
-          route: "/webadmin/grievances/completed",
-        },
-      ],
-    },
   ],
 
   // =========================================================
