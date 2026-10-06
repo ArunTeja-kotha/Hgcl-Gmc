@@ -23,6 +23,9 @@ import TmsComplaints from "../pages/tms/tms_complaints";
 
 import FieldUserAssignedGrievances from "../pages/Field/FieldUserAssignedGrievances";
 import FieldUserCompletedGrievances from "../pages/Field/FieldUserCompletedGrievances";
+import GrievanceRegistration from "../pages/citizens/citizenGrievanceRegistration";
+import CitizenProfileUpdate from "../pages/citizens/citizenProfileUpdate";
+import CitizenGrievanceTracking from "../pages/citizens/CitizensGrievanceTracking";
 
 import Layout from "../components/Layout";
 
@@ -209,6 +212,47 @@ const AppRoutes = () => {
   }
 />
 
+ {/* CITIZEN */}
+
+{/* Add Grievance */}
+<Route
+  path="/citizen/grievances/add"
+  element={
+    <Layout>
+      <GrievanceRegistration />
+    </Layout>
+  }
+/>
+
+{/* View My Grievances */}
+<Route
+  path="/citizen/grievances/my"
+  element={
+    <Layout>
+      <CitizenGrievanceTracking />
+    </Layout>
+  }
+/>
+
+{/* Reopen Grievance */}
+<Route
+  path="/citizen/grievances/reopen"
+  element={
+    <Layout>
+      <CitizenGrievanceTracking />
+    </Layout>
+  }
+/>
+
+{/* Citizen Profile */}
+<Route
+  path="/citizen/profile"
+  element={
+    <Layout>
+      <CitizenProfileUpdate />
+    </Layout>
+  }
+/>
  </Routes>
   );
 };

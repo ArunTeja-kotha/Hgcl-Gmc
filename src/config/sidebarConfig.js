@@ -211,6 +211,11 @@ const sidebarConfig = {
         },
       ],
     },
+    {
+    menuId: 4,
+    name: "Profile",
+    route: "/citizen/profile",
+  },
   ],
 };
 
